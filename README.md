@@ -14,7 +14,7 @@ tarantoolctl rocks install https://raw.githubusercontent.com/tarantool/ldecnumbe
 
 # Simple example
 
-One user billing system
+Single user billing system
 
 ```
 decnumber = require('ldecNumber')
@@ -45,7 +45,7 @@ balance:tostring() --> '0.14'
 
 # HTML documentation
 
-https://htmlpreview.github.io/?https://github.com/tarantool/ldecnumber/blob/master/ldecNumber/doc/ldecNumber.html
+https://htmlpreview.github.io/?https://github.com/tarantool/ldecnumber/blob/master/doc/ldecNumber.html
 
 # Links
 
