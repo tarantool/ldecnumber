@@ -1,0 +1,1691 @@
+﻿=pod
+
+=head1 NAME
+
+B<ldecNumber> - a Lua 5.1 wrapper for the Decimal Number library 
+B<decNumber>
+
+=head1 OVERVIEW
+
+The B<ldecNumber> package is a Lua module for General Decimal Arithmetic.
+For the background and rationale for the design of the arithmetic, see 
+Decimal Floating-Point: Algorism for Computers in the Proceedings of 
+the 16th IEEE Symposium on Computer Arithmetic (Cowlishaw, M. F., 
+2003). L<http://www2.hursley.ibm.com/decimal/IEEE-cowlishaw-arith16.pdf>
+The B<decNumber> package, an arbitrary-precision implementation of 
+the specifications in ANSI C, provides a reference implementation for 
+both the arithmetic and the encodings, and is used as the basis for 
+the B<ldecNumber> package. See Mike Cowlishaw's decimal page 
+L<http://www2.hursley.ibm.com/decimal/> 
+for more information and the latest versions of the B<decNumber> 
+package and test code.
+
+The B<ldecNumber> package was designed to provide the arithmetic 
+facilities of the B<decNumber> package with a Lua flavor. It is a 
+loadable Lua module, designed for Lua 5.1.
+
+=head1 DOWNLOAD
+
+B<ldecNumber> source code can be downloaded from its 
+LuaForge (L<http://luaforge.net/projects/ldecnumber/>) page.
+
+The source code from the B<decNumber> package and the decTest package are 
+included in the B<ldecNumber> distribution for a few reasons:
+
+=over4
+
+=item 1
+
+A couple of minor modifications were made to decTest to correct syntax 
+errors.
+
+=item 2
+
+The B<decNumber> package is fairly small, and including it is a 
+convenience to users as well as a means of documenting exactly the 
+code used to build and test the B<ldecNumber> package
+
+=item 3
+
+IBM's liberal ICU License allows me to do so!
+
+=back
+
+The distribution also includes a copy of the decNumber C library 
+User's Guide, I<decNumber.pdf>. This is the best reference for the 
+specification of most of the functions included in the C<decNumber> 
+module.
+
+=head1 INSTALLATION
+
+A I<Makefile> is provided. 
+
+=head1 IMPLEMENTATION
+
+A few arbitrary choices were made in the implementation of the Lua 
+wrapper.
+
+=head2 Precision
+
+The size of structures used in the B<decNumber> package determines the 
+maximum number of decimal digits in decimal numbers it can manipulate.  
+The default build of the C<decNumber> module is configured for 69 digits. 
+This number was chosen for a couple reasons: the resulting structure 
+size is between 57 and 64 bytes in size (so each decimal number takes 
+this this much space), and this precision is a bit more than twice 
+what is needed for Decimal128 external format. Providing twice the 
+external format's precision seemed like a good practice for mitigation 
+of rounding issues during calculations with these numbers.
+
+I<Note: the B<ldecNumber> package does not yet support any external binary 
+formats, such as Decimal128, though it may in the future. Presently 
+Lua strings and Lua numbers are the only "external" formats.>
+
+In any case, you may change the value of C<DECNUMDIGITS> during a build 
+of  the C<decNumber> module to accommodate more digits, or reduce memory 
+overhead if you need fewer digits. The  C<decNumber> module has only been 
+tested with the default setting, and one or two others.
+
+=head2 Context
+
+The decNumber context provides configuration settings such as working 
+precision and rounding mode, and also holds condition flags. Functions 
+in the B<decNumber> package take a context argument. Using this approach 
+in Lua would have made infix operator syntax impossible. This would 
+not have been very Lua-like.
+
+Instead, the  C<decNumber> module automatically maintains a decNumber 
+context per Lua thread. This thread decNumber context may be modified 
+and inspected. It may also be retrieved and restored, so threads may 
+maintain multiple contexts if desired. Modifications to the context 
+in one thread do not affect the contexts in other threads, unless, of 
+course, threads explicitly retrieve, exchange, and replace their 
+contexts with a shared context. (If you don't use setcontext you 
+don't need to worry!)
+
+The default decNumber context is C<DEC_INIT_DECIMAL128> as described  
+in I<decNumber.pdf>. This default may be changed during a build of the 
+C<decNumber> module by changing the value of C<LDN_CONTEXT_DEFAULT>. 
+The context method setdefault may be used to initialize a context to 
+one of the well known default configurations.
+
+=head2 Naming Convention
+
+Names in the B<decNumber> package follow a convention of a 
+C<decNumber> or C<DEC_> prefix and mixed case, or for some constants, 
+upper case. Lua code, on the other hand, tends toward lower case 
+identifiers. I attempted to unify this by 
+
+=over 4
+
+=item *
+
+using C<decNumber> as the module name 
+
+=item *
+
+stripping the prefix described above from the function 
+names and constants (since the module name prefix will typically be 
+there anyway)
+
+=item *
+
+using lower case for function names, but otherwise 
+retaining the spelling, and 
+
+=item *
+
+retaining the case for constant names
+
+=back
+
+There are two cases where in following these rules the B<decNumber> 
+names clash with Lua reserved words C<or> and C<and> -- in these 
+cases the B<decNumber> functions are called "logical" operations,
+so I called the functions C<lor> and C<land>.
+
+Wherever there was a predefined Lua metamethod, e. g., C<__add>, the 
+appropriate function is bound to that name as well as the B<decNumber> 
+package function name.
+
+Where it seemed appropriate, functions are provided both as methods 
+on decimal numbers, as well as functions in the C<decNumber> module.
+
+=head2 Mutability
+
+The decimal numbers created by Lua are not mutable. This decision 
+was based on my judgment that the potential performance benefit, 
+mainly lower memory consumption and less garbage collection, was 
+outweighed by the safety and lack of "surprise" that immutability 
+provides. This makes decimal numbers compatible with Lua numbers 
+and strings, both of which are also not mutable.
+
+=head2 Conversion
+
+All the functions in the C<decNumber> module automatically convert 
+their arguments from Lua numbers or strings as necessary to perform 
+the operation. This conversion is done with the current settings in 
+the thread decNumber context.
+
+=head1 EXAMPLES
+
+The distribution contains an I<examples> directory with Lua 
+translations of some of the C examples from the B<decNumber> package.
+
+=head1 VERIFICATION TESTS
+
+The distribution contains a test directory with a few test files.
+
+=head2 Unit Tests
+
+File: I<ldecNumberUnitTest.lua>
+
+This is a small but expanding set of unit tests for the C<decNumber> 
+module. It uses the lunit module that can be obtained from Mike 
+Roth's page L<http://www.nessie.de/mroth/lunit/>.
+
+File: I<ldecNumberGausstest.lua>
+
+This is a small small tests for the 
+L<C<decNumber.randomstate>|/decNumber.randomstate> 
+function and use of L<Random States>. It defines a Gaussian random
+number generator, and tests it by graphing the result of many
+executions. It uses the B<Lua DISLIN> library for graphing, see
+LuaForge for Lua DISLIN 
+L<http://luaforge.net/projects/ldislin/files>.
+
+File: I<ldecNumberThreadsTest.lua>
+
+This is a simple test that the decimal context in each thread is 
+independent. It requires visual inspection of the results to verify 
+that thread 1 is rounding ROUND_HALF_DOWN and thread 2 is rounding 
+ROUND_HALF_EVEN.
+
+=head2 Performance Tests
+
+File: I<ldecNumberPerf.lua>
+
+This is a simple test of the speed of some arbitrary C<decNumber> 
+module functions. It was useful to confirm that  decimal context 
+caching was worthwhile. It relies on the lperformance module, which 
+is included, but has been designed for WindowsXP.
+
+=head2 Compliance Test
+
+File: I<ldecNumberTestDriver.lua>
+
+This is the big test. It uses dectest sources from IBM, and has 
+over 60,000 test cases. The Lua file is a driver to execute the tests 
+specified by dectest.
+
+As of version 21 of the Lua C<decNumber> module, the results for this 
+test (dectest version 2.55) are: 
+
+C<For all 60937 tests, 59951 succeeded, 5 failed, 301 failed(conv), 644 skipped(#), 36 skipped(prec).>
+
+This is as good as possible with the default configuration. What this means is:
+
+	59951 succeeded	woot!
+	5 failed	these 5 tests are know to fail in the decNumber C library;
+             these edge cases are under reconsideration in the Decimal Number Specification
+	301 failed(conv)	 the precision required for the operands is insufficient in the Lua wrapper
+	644 skipped(#)	 the test is for NULL arguments or format conversions not supported
+	36 skipped(prec) the test called for a  precision larger than provided in the Lua wrapper
+
+=head1 REFERENCE
+
+Here is a reference to the data types, constants, and functions in the 
+C<decNumber> module. Many of these will refer to the decNumber C library 
+User's Guide, I<decNumber.pdf>, for implementation details.
+
+The C<decNumber> module defines three userdata types with their own 
+metatables. These are L</Decimal Numbers>, L</Decimal Contexts>, and 
+decimal L</Random States>.
+
+=head1 Decimal Numbers
+
+Decimal numbers are immutable numeric values. In the default 
+configuration they can have up to 69 digits of precision, and 
+exponents of -999999999 to 999999999.
+
+Decimal numbers are created by the functions in the C<decNumber> 
+module. Since any arguments to these functions may be strings, 
+Lua numbers, or decimal numbers, conversion from strings or 
+Lua numbers to decimal numbers can be achieved in may ways. 
+The function L<C<decNumber.tonumber>|/decNumber.tonumber> is 
+the most obvious.
+
+In the descriptions below, arguments or results that may be a 
+string, Lua number, or decimal number are indicated by <decarg> 
+whereas arguments or results that must be a  decimal number 
+are indicated by C<decnum>.
+
+The metatable for decimal numbers is available as 
+C<decNumber.number_metatable>.
+
+=head1 Decimal Contexts
+
+Decimal contexts are mutable records that contain 
+
+=over 4
+
+=item *
+
+flags that control behaviors of the C<decNumber> module, such as 
+precision and rounding
+
+=item *
+
+conditions that report the status of sequence of operations, 
+such as overflow
+
+=back
+
+See L</Context> for some rational on how the C<decNumber> 
+module manages contexts.
+
+In the descriptions below, arguments or results that must be a  
+decimal context are indicated by C<decctx>.
+
+The metatable for decimal contexts is available as 
+C<decNumber.context_metatable>.
+
+=head1 Random States
+
+Random states are mutable records that contain opaque data for 
+generation of random numbers.
+
+See L</Operations on Random States> for the description of 
+functions for creating and using random states.
+
+In the descriptions below, arguments or results that must be a  
+decimal context are indicated by C<decrst>.
+
+The metatable for decimal contexts is available as 
+C<decNumber.drandom_metatable>.
+
+=head1 Constants
+
+Here are the constants exposed in the C<decNumber> module from the 
+B<decNumber> package.
+
+=head1 Rounding
+
+These numeric flags are used with 
+L<C<decctx:setround(x)>|/decctx:setround>
+
+    decNumber.ROUND_CEILING     round towards +infinity
+    decNumber.ROUND_UP          round away from 0
+    decNumber.ROUND_HALF_UP     0.5 rounds up
+    decNumber.ROUND_HALF_EVEN   0.5 rounds to nearest even
+    decNumber.ROUND_HALF_DOWN   0.5 rounds down
+    decNumber.ROUND_DOWN        round towards 0 (truncate)
+    decNumber.ROUND_FLOOR       round towards -infinity
+    decNumber.ROUND_05UP        round for reround
+
+=head1 Status Flags
+
+These numeric status flags are used with 
+L<C<decctx:getstatus()>|/decctx:getstatus>
+
+    decNumber.Conversion_syntax
+    decNumber.Division_by_zero
+    decNumber.Division_impossible
+    decNumber.Division_undefined
+    decNumber.Insufficient_storage
+    decNumber.Inexact
+    decNumber.Invalid_context
+    decNumber.Invalid_operation
+    decNumber.Overflow
+    decNumber.Clamped
+    decNumber.Rounded
+    decNumber.Subnormal
+    decNumber.Underflow
+
+These constants are combinations of the above status flags:
+
+    decNumber.IEEE_854_Division_by_zero
+    decNumber.IEEE_854_Inexact
+    decNumber.IEEE_854_Invalid_operation
+    decNumber.IEEE_854_Overflow
+    decNumber.IEEE_854_Underflow
+    decNumber.Errors       normally errors (results are qNaN, infinite, or 0)
+    decNumber.NaNs         cause a result to become qNaN
+    decNumber.Information  normally for information only (have finite results)
+
+=head1 Classifications
+
+These numeric classifications for decNumbers are aligned with IEEE 754r 
+and are returned by 
+L<C<decnum:class()>|/decnum:class> 
+Note that 'normal' and 'subnormal' are meaningful only with a decContext.
+
+    decNumber.CLASS_SNAN
+    decNumber.CLASS_QNAN
+    decNumber.CLASS_NEG_INF
+    decNumber.CLASS_NEG_NORMAL
+    decNumber.CLASS_NEG_SUBNORMAL
+    decNumber.CLASS_NEG_ZERO
+    decNumber.CLASS_POS_ZERO
+    decNumber.CLASS_POS_SUBNORMAL
+    decNumber.CLASS_POS_NORMAL
+    decNumber.CLASS_POS_INF
+
+These classifications are also returned as string values from 
+L<C<decnum:classasstring()>|/decnum:classasstring>
+
+=head1 Initialization Descriptors
+
+These constants are used with 
+L<C<decctx:setdefault(x)>|/decctx:setdefault>
+
+    decNumber.INIT_BASE
+    decNumber.INIT_DECIMAL32
+    decNumber.INIT_DECIMAL64
+    decNumber.INIT_DECIMAL128
+
+See note re: C<decNumber.INIT_BASE> and traps, below in 
+L<C<decctx:setdefault(x)>|/decctx:setdefault>
+
+=head1 Compile time configuration
+
+These constants provide information about the compile time 
+configuration.
+
+    decNumber.MAX_DIGITS  constant DECNUMDIGITS, the maximum precision
+
+    decNumber.version     a string with the decNumber module version information
+
+=head1 Operations on Contexts
+
+The following functions operate on decimal contexts. See the 
+decNumber C library User's Guide, I<decNumber.pdf> for details 
+about contexts, and constants used for manipulating them.
+
+=head2 C<decNumber.getcontext>
+
+    decNumber.getcontext ()
+
+Returns the thread's current decimal context.
+
+=head2 C<decctx:duplicate>
+
+    decctx:duplicate()
+
+Returns a copy of the decimal context argument. This may be used, 
+for example, to save and restore a context around temporary 
+modifications, or to keep multiple decimal contexts on hand for 
+quick wholesale context changes (rather than changing individual 
+fields). You probably don't ever need to do this!
+
+=head2 C<decctx:setcontext>
+
+    decNumber.setcontext (decctx)
+    decctx:setcontext ()
+
+Sets the thread's decimal context to the argument, and returns 
+the previous decimal context, i. e., the one that was just replaced. 
+You probably don't ever need to do this!
+
+=head2 C<decctx:setdefault>
+
+    decctx:setdefault (initconst)
+
+Initializes the context argument to the settings specified by the 
+initconst. See L</Initialization Descriptors> for permitted values for 
+initconst. No values are returned.
+
+Note: since traps are not supported, C<decNumber.INIT_BASE> differs 
+from the behavior documented in the decNumber C library User Guide in 
+that it leaves traps disabled.
+
+Uses the C library function C<decContextDefault()>.
+
+=head2 C<decctx:getclamp>
+
+    decctx:getclamp ()
+
+Returns the integer value of the C<clamp> field of the context 
+argument. When 0, a result exponent is limited to C<emax> (for 
+example, the exponent of a zero result will be clamped to this value). 
+When 1, a result exponent is limited to C<emax-(digits-1)>.
+
+=head2 C<decctx:getdigits>
+
+    decctx:getdigits ()
+
+Returns the integer value of the C<digits> field of the context 
+argument. This is the working precision for this decimal context. 
+The results of decimal number operations will be rounded to this 
+length if necessary. 
+
+=head2 C<decctx:getemax>
+
+    decctx:getemax ()
+
+Returns the integer value of the C<emax> field of the context 
+argument. This is the magnitude of the largest adjusted exponent 
+that is permitted.
+
+=head2 C<decctx:getemin>
+
+    decctx:getemin ()
+
+Returns the integer value of the C<emin> field of the context 
+argument. This is the smallest adjusted exponent that is permitted 
+for normal numbers.
+
+=head2 C<decctx:getround>
+
+    decctx:getround ()
+
+Returns the integer value of the C<round> field of the context 
+argument. See L</Rounding> for possible values.
+
+=head2 C<decctx:getstatus>
+
+    decctx:getstatus ()
+
+Returns the integer value of the C<status> field of the context 
+argument. See L</Status Flags> for possible values. In general, 
+the result will be a bitwise-or of a subset of these values.
+
+=head2 C<decctx:getstatusstring>
+
+    decctx:getstatusstring ()
+
+Returns a string derived from the present value of the context 
+argument's status field using the C library function 
+C<decContextStatusToString()>.
+
+=head2 C<decctx:gettraps>
+
+    decctx:gettraps ()
+
+Returns 0 (we hope!) since traps are not implemented in the 
+Lua wrapper - use the status flags instead!
+
+=head2 C<decctx:setclamp>
+
+    decctx:setclamp (num)
+
+Sets the integer value of the C<clamp> field of the context 
+argument to C<num>. When 0, a result exponent is limited to 
+C<emax> (for example, the exponent of a zero result will be 
+clamped to this value). When 1, a result exponent is limited 
+to C<emax - (digits - 1)>.
+
+Returns the previous value of the C<clamp> field.
+
+Note that it is an error if num is not one of the values 0 or 1.
+
+=head2 C<decctx:setdigits>
+
+    decctx:setdigits (num)
+
+Sets the integer value of the C<digits> field of the context 
+argument to C<num>. This is the working precision for this 
+decimal context. The results of subsequent decimal number 
+operations will be rounded to this length if necessary.
+
+Returns the previous value of the C<digits> field.
+
+Note that it is an error if num exceeds C<decNumber.MAX_DIGITS>.
+
+=head2 C<decctx:setemax>
+
+    decctx:setemax (num)
+
+Sets the integer value of the C<emax> field of the context 
+argument to C<num>. This is the magnitude of the largest 
+adjusted exponent that is permitted.
+
+Returns the previous value of the C<emax> field.
+
+Note that it is an error if num is outside the range 
+0 though 999,999,999.
+
+=head2 C<decctx:setemin>
+
+    decctx:setemin (num)
+
+Sets the integer value of the C<emin> field of the context 
+argument to C<num>. This is the smallest adjusted exponent 
+that is permitted for normal numbers. C<emin> will usually equal 
+C<-emax>, but when a compressed format is used it will be 
+C<-(emax-1)>.
+
+Returns the previous value of the C<emin> field.
+
+Note that it is an error if num is outside the range 
+-999,999,999 though 0.
+
+=head2 C<decctx:setround>
+
+    decctx:setround (rounding)
+
+Sets the integer value of the C<round> field of the context 
+argument to C<rounding>. This is used to select the rounding 
+algorithm to be used if rounding is necessary during subsequent 
+decimal number operations.
+
+Returns the previous value of the C<round> field.
+
+Note that it is an error if rounding is not one of the values 
+described in L</Rounding>.
+
+=head2 C<decctx:setstatus>
+
+    decctx:setstatus (flags)
+
+Sets the integer value of the C<status> field of the context 
+argument to C<flags>. See L</Status Flags> for possible values. 
+In general, the flags will be a bitwise-or of a subset of these 
+values. Usually the C<flags> are 0 to clear all conditions.
+
+Returns the previous value of  the status  field.
+
+Note that it is an error if flags is not a bitwise-or of a subset 
+of the values in L</Status Flags>.
+
+=head2 C<decctx:setstatusstring>
+
+    decctx:setstatusstring (flagname)
+
+Sets the decimal context's status bit corresponding to the name 
+string argument C<flagname> using the C library function 
+C<decContextSetStatusFromString()>.
+
+=head2 C<decctx:settraps>
+
+    decctx:settraps (flags)
+
+Sets the integer value of the C<traps> field of the context 
+argument to C<flags>. 
+
+Note that it is an error if C<flags> is not zero since traps 
+are not implemented in the Lua wrapper - use the status 
+flags instead!
+
+=head1 Operations on Numbers
+
+The following functions operate on decimal numbers. In the 
+descriptions below, arguments or results that may be a string, 
+Lua number, or decimal number are indicated by C<decarg> whereas 
+arguments or results that must be a decimal number are indicated by 
+C<decnum>. See L</Decimal Numbers>.
+
+See the decNumber C library User's Guide, I<decNumber.pdf> for 
+details about limitations of the functions, and behavior in 
+exceptional situations.
+
+B<Conversions>
+
+=head2 C<decnum:__concat>
+
+    decnum:__concat (<string>)
+
+Returns a string representing the value of the decimal number 
+argument concatenated with the string argument. See 
+L<C<decnum:tostring>|/decnum:tostring> below for a description 
+of the conversion operation.
+
+Note that by binding the method __concat to this function, the 
+Lua C<..> concatenation operator will work with a decimal number 
+and a string, in either order, due to Lua's internal application 
+of this method when one side of the C<..> concatenation operator 
+is a decimal number. 
+
+Uses the C library function C<decNumberToString()>.
+
+=head2 C<decnum:toengstring>
+
+    decnum:toengstring ()
+    decNumber.toengstring (decarg)
+
+Returns a string representing the value of the argument (converted 
+to a decimal number first if necessary) using engineering notation 
+(where the exponent will be a multiple of three, and there may be 
+up to three digits before any decimal point) if an exponent is needed. 
+It implements the to-engineering-string conversion.
+
+Uses the C library function decNumberToEngString().
+
+=head2 C<decNumber.tonumber>
+
+    decNumber.tonumber (decarg)
+
+Returns a decimal number. If the argument is a decimal number, it is 
+simply returned. If the argument is a Lua number or string, it is 
+converted, using the present decimal context as usual, to a decimal 
+number and this value is returned.
+
+Uses the C library function C<decNumberFromString()>.
+
+=head2 C<decnum:tostring>
+
+    decnum:tostring ()
+    decnum:__tostring ()
+    decNumber.tostring (decarg)
+
+Returns a string representing the value of the argument (converted to 
+a decimal number first if necessary) using scientific notation if an 
+exponent is needed (that is, there will be just one digit before any 
+decimal point). It implements the to-scientific-string conversion.
+
+Note that by binding the method C<__tostring> to this function, the 
+Lua C<print> and C<tostring> functions will work with decimal numbers, 
+using this conversion function.
+
+Uses the C library function C<decNumberToString()>.
+
+B<Operations>
+
+=head2 C<decnum:abs>
+
+    decnum:abs ()
+    decNumber.abs (decarg)
+
+Returns a decimal number that is the absolute value of the argument.
+
+Uses the C library function C<decNumberAbs()>.
+
+=head2 C<decnum:add>
+
+    decnum:add (decarg)
+    decnum:__add (decarg)
+    decNumber.add (decarg, decarg)
+
+Returns a decimal number that is the sum of its arguments.
+
+Note that by binding the method C<__add> to this function, the 
+Lua addition operator (C<+>) may be used with a C<decnum> on the 
+left and a C<decarg> on the right.
+
+Uses the C library function C<decNumberAdd()>.
+
+=head2 C<decnum:copy>
+
+    decnum:copy ()
+    decNumber.copy (decarg)
+
+Returns a decimal number that is a copy of its argument. This is 
+not too useful since C<decnum>s are immutable in B<ldecNumber>,
+but it could be used as an alternative to 
+L<C<decnum:tonumber>|/decnum:tonumber>
+No error is possible from this function when its argument is a 
+C<decnum>.
+
+Uses the C library function C<decNumberCopy()>.
+
+=head2 C<decnum:copyabs>
+
+    decnum:copyabs ()
+    decNumber.copyabs (decarg)
+
+Returns a decimal number that is the absolute value of its argument.
+This is the quiet C<abs> function described in IEEE 754r.
+No error is possible from this function when its argument is a 
+C<decnum>.
+
+Uses the C library function C<decNumberCopyAbs()>.
+
+=head2 C<decnum:copynegate>
+
+    decnum:copynegate ()
+    decNumber.copynegate (decarg)
+
+Returns a decimal number that is the negation of its argument, in
+other words it returns a copy of its argument with the sign inverted.
+This is the quiet C<negate> function described in IEEE 754r.
+No error is possible from this function when its argument is a 
+C<decnum>.
+
+Uses the C library function C<decNumberCopyNegate()>.
+
+=head2 C<decnum:copysign>
+
+    decnum:copysign (decarg)
+    decNumber.copysign (decarg, decarg)
+
+Returns a decimal number that is a copy of its first argument but 
+with the sign of its second argument.
+This is the quiet C<copysign> function described in IEEE 754r.
+No error is possible from this function when its arguments are 
+both C<decnum>s.
+
+Uses the C library function C<decNumberCopySign()>.
+
+=head2 C<decnum:divide>
+
+    decnum:divide (decarg)
+    decnum:__div (decarg)
+    decNumber.divide (decarg, decarg)
+
+Returns a decimal number that is the left (1st) argument divided 
+by the right (2nd) argument.
+
+Note that by binding the method C<__div> to this function, the 
+Lua division operator (C</>) may be used with a C<decnum> on the 
+left and a C<decarg> on the right.
+
+Uses the C library function C<decNumberDivide()>.
+
+=head2 C<decnum:divideinteger>
+
+    decnum:divideinteger (decarg)
+    decNumber.divideinteger (decarg, decarg)
+
+Returns a decimal number that is the integer part of the result 
+of dividing of its arguments. Note that, per the B<decNumber> 
+specification, this is a convert to integer by truncation. If 
+you want some other rounding mode, use L<C<decnum:floor>|/decnum:floor>, 
+or for any rounding mode use 
+L<C<decnum:tointegralvalue>|/decnum:tointegralvalue>
+or L<C<decnum:quantize>|/decnum:quantize>.
+
+Uses the C library function C<decNumberDivideInteger()>.
+
+=head2 C<decnum:exp>
+
+    decnum:exp ()
+    decNumber.exp (decarg)
+
+Returns a decimal number that is e raised to the power of the argument.
+
+Uses the C library function C<decNumberExp()>. 
+
+=head2 C<decnum:floor>
+
+    decnum:floor (decarg)
+    decNumber.floor (decarg, decarg)
+
+Returns a decimal number integer that is the floor of the left (1st) 
+argument divided by the right (2nd) argument. Contrast this with 
+L<C<decnum:divideinteger>|/decnum:divideinteger> which uses truncation.
+
+The floor function is implemented as equal to 
+L<C<decnum:divideinteger>|/decnum:divideinteger> if the signs of the 
+arguments are the same or if the remainder is zero, otherwise as equal 
+to the L<C<decnum:divideinteger>|/decnum:divideinteger> result minus 1. 
+The current context's rounding mode is used. 
+See L<C<decnum:mod>|/decnum:mod>.
+
+Uses the C library function C<decNumberDivideInteger()>, and then 
+C<decNumberMultiply()> followed by C<decNumberCompare() decNumberIsZero()> 
+to check if the remainder is zero, and C<decNumberSubtract()>.
+
+=head2 C<decnum:fma>
+
+    decnum:fma (decarg,decarg)
+    decNumber.fma (decarg, decarg, decarg)
+
+Returns a decimal number that is the result of multiplying the first
+argument by the second argument and then adding the third argument to 
+that intermediate result. It is equivalent to a multiplication followed 
+by an addition except that the intermediate result is not rounded and 
+will not cause overflow or underflow. That is, only the final result 
+is rounded and checked.
+
+Uses the C library function C<decNumberFMA()>.
+
+=head2 C<decnum:invert>
+
+    decnum:invert ()
+    decNumber.invert (decarg)
+
+Returns a decimal number that is the result of the digit-wise logical 
+inversion of the argument (a 0 digit becomes 1 and vice versa).
+
+Uses the C library function C<decNumberInvert()>.
+
+=head2 C<decnum:land>
+
+    decnum:land (decarg)
+    decNumber.land (decarg, decarg)
+
+Returns a decimal number that is the digit-wise logical and of the 
+arguments. Note that all digits of the arguments must be 0 or 1 or
+else this operation returns NaN,
+
+Uses the C library function C<decNumberAnd()>.
+
+=head2 C<decnum:ln>
+
+    decnum:ln ()
+    decNumber.ln (decarg)
+
+Returns a decimal number that is the natural logarithm (logarithm in 
+base e) of the argument.
+
+Uses the C library function C<decNumberLn()>.
+
+=head2 C<decnum:log10>
+
+    decnum:log10 ()
+    decNumber.log10 (decarg)
+
+Returns a decimal number that is the logarithm in base ten of the 
+argument.
+
+Uses the C library function C<decNumberLog10()>.
+
+=head2 C<decnum:logb>
+
+    decnum:logb ()
+    decNumber.logb (decarg)
+
+Returns a decimal number that is the adjusted exponent of the 
+argument, according to the rules for the C<logB> operation of the 
+IEEE 754r proposal. This returns the exponent of the argument as 
+though its decimal point had been moved to follow the first digit 
+while keeping the same value. The result is not limited by 
+C<emin> or C<emax>.
+
+Uses the C library function C<decNumberLogB()>.
+
+=head2 C<decnum:lor>
+
+    decnum:lor (decarg)
+    decNumber.lor (decarg, decarg)
+
+Returns a decimal number that is the digit-wise logical inclusive or 
+of the arguments. Note that all digits of the arguments must be 0 or 
+1 or else this operation returns NaN,
+
+Uses the C library function C<decNumberOr()>.
+
+=head2 C<decnum:max>
+
+    decnum:max (decarg)
+    decNumber.max (decarg, decarg)
+
+Returns a decimal number that is the maximum of its arguments.
+
+Uses the C library function C<decNumberMax()>.
+
+=head2 C<decnum:maxmag>
+
+    decnum:maxmag (decarg)
+    decNumber.maxmag (decarg, decarg)
+
+Returns a decimal number that is the one of its arguments that 
+has the maximum magnitude. It is identical to 
+L<C<decnum:max>|/decnum:max> except that the signs of the operands 
+are ignored and taken to be 0 (non-negative).
+
+Uses the C library function C<decNumberMaxMag()>.
+
+=head2 C<decnum:min>
+
+    decnum:min (decarg)
+    decNumber.min (decarg, decarg)
+
+Returns a decimal number that is the minimum of its arguments.
+
+Uses the C library function C<decNumberMin()>.
+
+=head2 C<decnum:minmag>
+
+    decnum:minmag (decarg)
+    decNumber.minmag (decarg, decarg)
+
+Returns a decimal number that is the one of its arguments that 
+has the minimum magnitude. It is identical to 
+L<C<decnum:min>|/decnum:min> except that the signs of the operands 
+are ignored and taken to be 0 (non-negative).
+
+Uses the C library function C<decNumberMinMag()>.
+
+=head2 C<decnum:minus>
+
+    decnum:minus ()
+    decnum:__unm ()
+    decNumber.minus (decarg)
+
+Returns a decimal number that is the result of subtracting 
+the argument from 0.
+
+Note that by binding the method C<__unm> to this function, the 
+Lua unary minus operator (C<->) may be used with decimal numbers.
+
+Uses the C library function C<decNumberMinus()>.
+
+=head2 C<decnum:mod>
+
+    decnum:mod (decarg)
+    decnum:__mod (decarg)
+    decNumber.mod (decarg, decarg)
+
+Returns a decimal number that is remainder of the left (1st) 
+argument divided by the right (2nd) argument based on Lua rules 
+for the mod operator (C<%>). Lua defines
+
+    a % b == a - floor(a/b)*b
+
+whereas the General Decimal Arithmetic Specification defines 
+remainder using truncation. 
+
+The C<mod> function is implemented as equal to 
+L<C<decnum:remainder>|/decnum:remainder> if the signs of the 
+arguments are the same or the remainder is zero, otherwise as 
+equal to the remainder plus the divisor. The current context's 
+rounding mode is used.
+
+Note that by binding the method C<__mod> to this function, the 
+Lua modulo operator (C<%>) may be used with a C<decnum> on the 
+left and a C<decarg> on the right.
+
+Uses the C library functions C<decNumberRemainder()>, 
+C<decNumberIsNegative()>, C<decNumberIsZero()>, and C<decNumberAdd()>.
+
+=head2 C<decnum:multiply>
+
+    decnum:multiply (decarg)
+    decnum:__mul (decarg)
+    decNumber.multiply (decarg, decarg)
+
+Returns a decimal number that is the product of its arguments.
+
+Note that by binding the method C<__mul> to this function, the Lua 
+multiplication operator (C<*>) may be used with a C<decnum> on the 
+left and a C<decarg> on the right.
+
+Uses the C library function C<decNumberMultiply()>.
+
+=head2 C<decnum:nextminus>
+
+    decnum:nextminus ()
+    decNumber.nextminus (decarg)
+
+Returns a decimal number that is the closest value to the argument 
+in the direction of -Infinity. This is computed as though by 
+subtracting an infinitesimal amount from the argument 
+using C<ROUND_FLOOR>, except that no flags are set as long as the 
+argument is a C<decnum> (unless the argument is a signaling NaN).
+
+This function is a generalization of the IEEE 754 C<nextDown> 
+operation.
+
+Uses the C library function C<decNumberNextMinus()>.
+
+=head2 C<decnum:nextplus>
+
+    decnum:nextplus ()
+    decNumber.nextplus (decarg)
+
+Returns a decimal number that is the closest value to the argument 
+in the direction of +Infinity. This is computed as though by 
+adding an infinitesimal amount from the argument 
+using C<ROUND_CEILING>, except that no flags are set as long as the 
+argument is a C<decnum> (unless the argument is a signaling NaN).
+
+This function is a generalization of the IEEE 754 C<nextUp> 
+operation.
+
+Uses the C library function C<decNumberNextPlus()>.
+
+=head2 C<decnum:nexttoward>
+
+    decnum:nexttoward (decarg)
+    decNumber.nexttoward (decarg, decarg)
+
+Returns a decimal number that is the closest value to the first 
+argument in the direction of the second argument. This is computed 
+as though by adding or subtracting an infinitesimal amount to the 
+first argument using either C<ROUND_CEILING> or C<ROUND_FLOOR>
+depending on whether the second argument is larger or smaller than
+the first argument. If the arguments are numerically equal, then 
+the result is a copy of the first argument with the sign of the 
+second argument. Flags are set as usual for an addition or 
+subtraction (no flags are set in the equals case). 
+
+This function is a generalization of the IEEE 754 C<nextAfter> 
+operation.
+
+Uses the C library function C<decNumberNextToward()>.
+
+=head2 C<decnum:normalize>
+
+    decnum:normalize ()
+    decNumber.normalize (decarg)
+
+Returns a decimal number that is the result of adding the argument 
+to 0, and putting the result in its simplest form. That is, a non-zero 
+number which has any trailing zeros in the coefficient has those zeros 
+removed by dividing the coefficient by the appropriate power of ten 
+and adjusting the exponent accordingly, and a zero has its exponent 
+set to 0. 
+
+Uses the C library function C<decNumberNormalize()>.
+
+=head2 C<decnum:plus>
+
+    decnum:plus ()
+    decNumber.plus (decarg)
+
+Returns a decimal number that is the result of adding the argument 
+to 0. This takes place according to the settings given in the 
+decimal context, following the usual arithmetic rules. This may 
+therefore be used for rounding.
+
+Uses the C library function C<decNumberPlus()>.
+
+=head2 C<decnum:power>
+
+    decnum:power (decarg)
+    decnum:__pow (decarg)
+    decNumber.power (decarg, decarg)
+
+Returns a decimal number that is the left (1st) argument raised to 
+the power of the right (2nd) argument.
+
+Note that by binding the method C<__pow> to this function, the Lua 
+power operator (C<^>) may be used with a C<decnum> on the left 
+and a C<decarg> on the right.
+
+Uses the C library function C<decNumberPower()>.
+
+=head2 C<decnum:quantize>
+
+    decnum:quantize (decarg)
+    decNumber.quantize (decarg, decarg)
+
+Returns a decimal number that is numerically equal (except for 
+any rounding) to the left (1st) argument but modified so its 
+exponent has a specific value, equal to that of the right (2nd) 
+argument. To achieve this, the coefficient of the result is 
+adjusted (by rounding or shifting) so that its exponent has the 
+requested value. For example, if the left (1st) argument had 
+the value 123.4567, and the right (2nd) argument had the 
+value 0.12, the result would be 123.46 (that is, 12346 with an 
+exponent of -2, matching the right (2nd) argument).
+
+Uses the C library function C<decNumberQuantize()>.
+
+=head2 C<decnum:remainder>
+
+    decnum:remainder (decarg)
+    decNumber.remainder (decarg, decarg)
+
+Returns a decimal number that is the remainder of the left (1st) 
+argument divided by the right (2nd) argument. The identity
+
+    lhs == (lhs:divideinteger(rhs) * rhs) + lhs:remainder(rhs)
+
+holds.
+
+Uses the C library function C<decNumberRemainder()>.
+
+=head2 C<decnum:remaindernear>
+
+    decnum:remaindernear (decarg)
+    decNumber.remaindernear (decarg, decarg)
+
+Returns a decimal number that is the remainder of the left (1st) 
+argument divided by the right (2nd) argument using the rules 
+defined in IEEE 854. This follows the same definition as 
+L<C<decnum:remainder>|/decnum:remainder>, except that the nearest 
+integer quotient (or the nearest even integer if the remainder 
+is equidistant from two) is used instead of the result from 
+L<C<decnum:divideinteger>|/decnum:divideinteger>.
+
+For example, C<decNumber.remaindernear(10, 6)> has the result -2 
+(instead of 4) because the multiple of 6 nearest to 10 is 12 
+(rather than 6).
+
+Uses the C library function C<decNumberRemainderNear()>.
+
+=head2 C<decnum:rescale>
+
+    decnum:rescale (decarg)
+    decNumber.rescale (decarg, decarg)
+
+Returns a decimal number that is numerically equal (except for 
+any rounding) to the left (1st) argument but modified so its exponent 
+has the value of the right (2nd) argument. See 
+L<C<decnum:quantize>|/decnum:quantize>. 
+The right (2nd) argument must be a whole number (before any rounding); 
+that is, any digits in the fractional part of the number must be zero.
+
+Uses the C library function C<decNumberRescale()>.
+
+=head2 C<decnum:rotate>
+
+    decnum:rotate (decarg)
+    decNumber.rotate (decarg, decarg)
+
+Returns a decimal number that is the first argument with the digits 
+of its coefficient rotated to the left (if the second argument is 
+positive) or to the right (if the second argument is negative) 
+without adjusting the exponent or the sign.
+
+If the first argument has fewer digits than context C<digits> the 
+coefficient is padded with zeros on the left before the
+rotate. Any leading zeros in the result are ignored, as usual.
+
+The second argument is the count of digits to rotate; it must be an 
+integer (that is, it must have an exponent of 0) and must be in the 
+range C<-digits> through C<+digits> in the current context.
+
+Uses the C library function C<decNumberRotate()>.
+
+=head2 C<decnum:samequantum>
+
+    decnum:samequantum (decarg)
+    decNumber.samequantum (decarg, decarg)
+
+Returns the decimal number 1 when the exponents of the arguments are 
+equal, or if they are both Infinities or they are both NaNs; in all 
+other cases returns the decimal number 0. This function is used to 
+test whether the exponents of two numbers are equal. The coefficients 
+and signs of the arguments are ignored.
+
+Uses the C library function C<decNumberSameQuantum()>.
+
+=head2 C<decnum:scaleb>
+
+    decnum:scaleb (decarg)
+    decNumber.scaleb (decarg, decarg)
+
+This function returns the result of multiplying the first argument by
+ten raised to the power of the second argument. It is used to adjust 
+(scale) the exponent of a number, using the rules of the C<scaleB> 
+operation in the IEEE 754r proposal. The second argument must be an 
+integer (that is, it must have an exponent of 0) and it must also be 
+in the range C<-n> through C<+n>, where C<n> is 
+C<2 * (context.emax + context.digits)>.
+
+Uses the C library function C<decNumberScaleB()>.
+
+=head2 C<decnum:shift>
+
+    decnum:shift (decarg)
+    decNumber.shift (decarg, decarg)
+
+Returns a decimal number that is the first argument with the digits 
+of its coefficient shifted to the left (if the second argument is 
+positive) or to the right (if the second argument is negative) 
+without adjusting the exponent or the sign.
+
+The coefficient is padded with zeros on the left or right, as 
+necessary. Any leading zeros in the result are ignored, as usual.
+
+The second argument is the count of digits to shift; it must be an 
+integer (that is, it must have an exponent of 0) and must be in the 
+range C<-digits> through C<+digits> in the current context.
+
+Uses the C library function C<decNumberShift()>.
+
+=head2 C<decnum:squareroot>
+
+    decnum:squareroot ()
+    decNumber.squareroot (decarg)
+
+Returns a decimal number that is the square root of its argument, 
+rounded if necessary using the digits setting in the decimal context 
+and using the round-half-even rounding algorithm.
+
+Uses the C library function C<decNumberSquareRoot()>.
+
+=head2 C<decnum:subtract>
+
+    decnum:subtract (decarg)
+    decnum:__sub (decarg)
+    decNumber.subtract (decarg, decarg)
+
+Returns a decimal number that is the left (1st) argument minus the 
+right (2nd) argument.
+
+Note that by binding the method C<__sub> to this function, the Lua 
+subtraction operator (C<->) may be used with a C<decnum> on the left 
+and a C<decarg> on the right.
+
+Uses the C library function C<decNumberSubtract()>.
+
+=head2 C<decnum:tointegralexact>
+
+    decnum:tointegralexact ()
+    decNumber.tointegralexact (decarg)
+
+Returns a decimal number that is the argument with any fractional 
+part removed, if necessary, using the rounding mode in the decimal 
+context.
+
+The C<Inexact> flag is set if the result is numerically different 
+from the argument. Other than that, no flags are set as long as the 
+argument is a C<decnum> (unless the argument is a signaling NaN).
+The result may have a positive exponent.
+
+Uses the C library function C<decNumberToIntegralExact()>.
+
+=head2 C<decnum:tointegralvalue>
+
+    decnum:tointegralvalue ()
+    decNumber.tointegralvalue (decarg)
+
+Returns a decimal number that is the argument with any fractional 
+part removed, if necessary, using the rounding mode in the decimal 
+context.
+
+No flags, not even C<Inexact>, are set as long as the 
+argument is a C<decnum> (unless the argument is a signaling NaN).
+The result may have a positive exponent.
+
+Uses the C library function C<decNumberToIntegralValue()>.
+
+=head2 C<decnum:trim>
+
+    decnum:trim ()
+    decNumber.trim (decarg)
+
+Returns a decimal number that is the argument with any insignificant 
+trailing zeros removed. That is, if the number has any fractional 
+trailing zeros they are removed by dividing the coefficient by the 
+appropriate power of ten and adjusting the exponent accordingly.
+
+Uses the C library function C<decNumberTrim()>.
+
+=head2 C<decnum:xor>
+
+    decnum:xor (decarg)
+    decNumber.xor (decarg, decarg)
+
+Returns a decimal number that is the digit-wise logical exclusive or 
+of the arguments. Note that all digits of the arguments must be 0 or 
+1 or else this operation returns NaN,
+
+Uses the C library function C<decNumberXor()>.
+
+B<Comparisons and Predicates>
+
+=head2 C<decnum:class>
+
+    decnum:class ()
+    decNumber.class (decarg)
+
+Returns the class of a decNumber. No error is possible. The class is
+one of the decNumber L</Classifications>.
+
+Uses the C library function C<decNumberClass()>.
+
+=head2 C<decnum:classasstring>
+
+    decnum:classasstring ()
+    decNumber.classasstring (decarg)
+
+Returns the class of a decNumber as a string. No error is 
+possible. The class is one of "-Infinity", "-Normal",  
+"-Subnormal", "-Zero", "+Zero", "+Subnormal",
+"+Normal", "+Infinity", "NaN", "sNaN", or "Invalid"
+
+Uses the C library functions C<decNumberClass()> and 
+C<decNumberClassToString()>.
+
+=head2 C<classtostring>
+
+    decNumber.classtostring (enum)
+
+Converts the L</Classifications> of a decNumber to a string. 
+No error is possible. The class is one of "-Infinity", 
+"-Normal", "-Subnormal", "-Zero", "+Zero", "+Subnormal",
+"+Normal", "+Infinity", "NaN", "sNaN", or "Invalid".
+
+Uses the C library function C<decNumberClassToString()>.
+
+=head2 C<decnum:compare>
+
+    decnum:compare (decarg)
+    decNumber.compare (decarg, decarg)
+
+Returns a decimal number that is the comparison of its arguments 
+numerically. If the left (1st) argument is less than the right (2nd) 
+argument then the result is -1. If they are equal (that is, when 
+subtracted the result would be 0), then the result is 0. If the 
+left (1st) argument is greater than the right (2nd) argument then the 
+result is 1. If the operands are not comparable (that is, one or both 
+is a NaN) then the result is NaN.
+
+Uses the C library function C<decNumberCompare()>.
+
+=head2 C<decnum:comparetotal>
+
+    decnum:comparetotal (decarg)
+    decNumber.comparetotal (decarg, decarg)
+
+Returns a decimal number that is the comparison of its arguments 
+numerically using the IEEE 754r proposed ordering. The result is the 
+similar to L<C<decnum:compare>|/decnum:compare> above, except that NaN 
+is never returned. The total order differs from the numerical 
+comparison in that:
+
+    -NaN <  -sNaN < -Infinity < -finites < -0 < +0 < +finites < +Infinity < +sNaN < +NaN.
+
+Also, C<1.000 < 1.0> (etc.) and NaNs are ordered by payload.
+
+Uses the C library function C<decNumberCompareTotal()>.
+
+=head2 C<decnum:comparetotalmag>
+
+    decnum:comparetotalmag (decarg)
+    decNumber.comparetotalmag (decarg, decarg)
+
+Returns a decimal number that is the comparison of the magnitude of 
+its arguments using the IEEE 754r proposed ordering. It is identical 
+to L<C<decnum:comparetotal>|/decnum:comparetotal> above except that 
+the signs of the operands are ignored and taken to be 0 (non-negative).
+
+Uses the C library function C<decNumberCompareTotalMag()>.
+
+=head2 C<decnum:eq>
+
+    decnum:eq (decarg)
+    decnum:__eq (decarg)
+    decNumber.eq (<decarg>, <decarg>)
+
+Returns a boolean that is true when the arguments are equal, false 
+otherwise.
+
+Note that by binding the method C<__eq> to this function, the Lua 
+equality operators (C<==> and C<~=>) may be used with a C<decnum> 
+on the left and a C<decnum> on the right.
+
+Uses the C library functions C<decNumberCompare()> and 
+C<decNumberIsZero()>.
+
+=head2 C<decnum:iscanonical>
+
+    decnum:iscanonical ()
+    decNumber.iscanonical (decarg)
+
+Returns true always, because decNumbers always have canonical 
+encodings (the function is provided for compatibility with the
+IEEE 754r operation C<isCanonical>). No error is possible.
+
+Uses the C library function C<decNumberIsCanonical()>.
+
+=head2 C<decnum:isfinite>
+
+    decnum:isfinite ()
+    decNumber.isfinite (decarg)
+
+Returns a boolean that is true if the argument is finite, false 
+otherwise (that is, the argument is an infinity or a NaN).
+No error is possible.
+
+Uses the C library function C<decNumberIsFinite()>.
+
+=head2 C<decnum:isinfinite>
+
+    decnum:isinfinite ()
+    decNumber.isinfinite (decarg)
+
+Returns a boolean that is true if the argument is infinite, 
+false otherwise. No error is possible.
+
+Uses the C library function C<decNumberIsInfinite()>.
+
+=head2 C<decnum:isnan>
+
+    decnum:isnan ()
+    decNumber.isnan (decarg)
+
+Returns a boolean that is true if the argument is a NaN (quiet or 
+signaling), false otherwise. No error is possible.
+
+Uses the C library function C<decNumberIsNaN()>.
+
+=head2 C<decnum:isnegative>
+
+    decnum:isnegative ()
+    decNumber.isnegative (decarg)
+
+Returns a boolean that is true if the argument is is normal (that 
+is, finite, non-zero, and not subnormal), false otherwise.
+No error is possible.
+ 
+Uses the C library function C<decNumberIsNegative()>.
+
+=head2 C<decnum:isnormal>
+
+    decnum:isnormal ()
+    decNumber.isnormal (decarg)
+
+Returns a boolean that is true if the argument is negative, false 
+otherwise.  No error is possible.
+
+Uses the C library function C<decNumberIsNormal()>.
+
+=head2 C<decnum:isqnan>
+
+    decnum:isqnan ()
+    decNumber.isqnan (decarg)
+
+Returns a boolean that is true if the argument is a quiet NaN, 
+false otherwise. No error is possible.
+
+Uses the C library function C<decNumberIsQNaN()>.
+
+=head2 C<decnum:issnan>
+
+    decnum:issnan ()
+    decNumber.issnan (decarg)
+
+Returns a boolean that is true if the argument is a signaling NaN, 
+false otherwise. No error is possible.
+
+Uses the C library function C<decNumberIsSNaN()>.
+
+=head2 C<decnum:isspecial>
+
+    decnum:isspecial ()
+    decNumber.isspecial (decarg)
+
+Returns a boolean that is true if the argument has a special 
+value (Infinity or NaN), false otherwise; it is the inversion of 
+L<C<decnum:isfinite>|/decnum:isfinite>. No error is possible.
+
+Uses the C library function C<decNumberIsSpecial()>.
+
+=head2 C<decnum:issubnormal>
+
+    decnum:issubnormal ()
+    decNumber.issubnormal (decarg)
+
+Returns a boolean that is true if the argument is subnormal (that 
+is, finite, non-zero, and not in the range of normal values), false 
+otherwise. No error is possible.
+
+Uses the C library function C<decNumberIsSubnormal()>.
+
+=head2 C<decnum:iszero>
+
+    decnum:iszero
+    decNumber.iszero (decarg)
+
+Returns a boolean that is true if the argument is zero, false 
+otherwise. No error is possible.
+
+Uses the C library function C<decNumberIsZero()>.
+
+=head2 C<decnum:le>
+
+    decnum:le (decarg)
+    decnum:__le (decarg)
+    decNumber.le (<decarg>, <decarg>)
+
+Returns a boolean that is true when left (1st) argument is less than 
+or equal to the right (2nd) argument, false otherwise.
+
+Note that by binding the method C<__le> to this function, the Lua 
+comparison operators (C<E<lt>=> and C<E<gt>=>) may be used with a 
+C<decnum> on the left and a C<decnum> on the right.
+
+Uses the C library functions C<decNumberCompare()> 
+C<decNumberIsNegative()> and C<decNumberIsZero()>.
+
+=head2 C<decnum:lt>
+
+    decnum:lt (decarg)
+    decnum:__lt (decarg)
+    decNumber.lt (<decarg>, <decarg>)
+
+Returns a boolean that is true when left (1st) argument is less than 
+the right (2nd) argument, false otherwise.
+
+Note that by binding the method C<__lt> to this function, the Lua 
+comparison operators (C<E<lt>> and C<E<gt>>) may be used with a 
+C<decnum> on the left and a C<decnum> on the right. Lua also assumes 
+that C<a E<lt>= b> is equivalent to C<not (b E<lt> a)> which in the 
+presence of NaNs may or may not be what you want - if not, use 
+L<C<decnum:compare>|/decnum:compare> directly.
+
+Uses the C library functions C<decNumberCompare()> and 
+C<decNumberIsNegative()>.
+
+=head2 C<decnum:radix>
+
+    decnum:radix ()
+    decNumber.radix (decarg)
+
+Returns the radix (number base) used by the decNumber package. This
+always returns 10. No error is possible..
+
+Uses the C library function C<decNumberRadix()>.
+
+=head1 Operations on Random States
+
+The following functions operate on random states.
+
+The random number generator in the B<ldecNumber> package is based 
+on a lagged Fibonacci generator ("LFIB4"). George Marsaglia has this 
+to say about LFIB4:
+
+    LFIB4 is an extension of what I have previously defined as a 
+    lagged Fibonacci generator [...] I have developed the 4-lag 
+    generator LFIB4 using addition [...] Its period is 2^31*(2^256-1), 
+    about 2^287, and it seems to pass all tests --- in particular, 
+    those of the kind for which 2-lag generators using +,-, xor 
+    seem to fail.
+
+The B<ldecNumber> package uses LFIB4 to produce a stream of bits in 
+10-bit chunks. This is convenient for making decimal numbers in 
+multiples of three decimal digits, and fits with the default setting 
+of the B<decNumber> compile time parameter C<DECDPUN>. If you change 
+C<DECDPUN> then you may not be able to use the B<ldecNumber> package's
+random states without modification to the C code. There is a compile
+time setting C<LDN_ENABLE_RANDOM> that should be defined to 0 to 
+disable random state features.
+
+The B<ldecNumber> package random state code has been tested with 
+L'Ecuyer and Simard's TestU01 Crush -- 
+see L<http://www.iro.umontreal.ca/~simardr/testu01/tu01.html>
+
+    ========= Summary results of Crush =========
+    Version:          TestU01-1.1
+    Generator:        Generator dec12
+    Number of statistics:  144
+    Total CPU time:   02:55:11.06
+    All tests were passed
+
+While this confers a great deal of confidence in the quality of the 
+generator, two caveats are in order:
+
+=over4
+
+=item 1.
+
+Crush uses IEEE doubles, and so the quality of the generator with more 
+than a dozen or so digits is untested, though believed to be good
+
+=item 2.
+
+This generator was not designed for cryptographic use, and so is 
+probably only useful for its intended applications: simulation 
+and testing
+
+=back
+
+=head2 C<decNumber.randomstate>
+
+    decNumber.randomstate ([a [, b [, c [, d]]]])
+
+Creates and returns a new random state C<decrst>. If any arguments 
+are not supplied, defaults are provided. The arguments C<a>, C<b>, 
+C<c>, and C<d> are used as inputs to the random number generator 
+KISS to initialize the random state.
+
+The random state userdata has one method: C<__call>. This means that 
+the random state may be used as a function to return random values.
+
+=head2 C<decrst:__call>
+
+    decrst([digits [, exponent]])
+
+Returns a new random decimal number. If supplied, C<digits> is the 
+number of decimal digits in the new random decimal number; the default 
+is 12. If supplied, C<exponent> is the exponent of the new random 
+decimal number; the default is C<-digits> so the new random decimal 
+number is between zero (inclusive) and one (exclusive).
+
+=head1 VERSION
+
+This is B<ldecNumber> version 21.
+
+=head1 CREDITS
+
+B<ldecNumber> was developed by Doug Currie, Londonderry, NH, USA.
+
+B<decNumber> was developed by Mike Cowlishaw at IBM.
+
+=head1 LICENSE
+
+The B<ldecNumber> distribution includes the C source code of the wrapper
+itself as a Lua module, a Makefile, examples, test code, and the 
+decNumber source code from IBM. The decNumber code is licensed as 
+follows (see I<ICU-license.html> in the distribution):
+
+=head2 ICU License - ICU 1.8.1 and later
+
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright (c) 1995-2005 International Business Machines Corporation and others
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, provided that the above
+copyright notice(s) and this permission notice appear in all copies of
+the Software and that both the above copyright notice(s) and this
+permission notice appear in supporting documentation.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder
+shall not be used in advertising or otherwise to promote the sale, use
+or other dealings in this Software without prior written authorization
+of the copyright holder.
+
+--------------------------------------------------------------------------------
+
+All trademarks and registered trademarks mentioned herein are the property of 
+their respective owners.
+
+=head2 ldecNumber License
+
+The non-IBM Lua decNumber code and documentation are:
+
+* Copyright (c) 2006-7 Doug Currie, Londonderry, NH
+
+and licensed under the same terms as the ICU License, above.

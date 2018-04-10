@@ -1,0 +1,1575 @@
+<HTML>
+<HEAD>
+<TITLE>Lua decNumber</TITLE>
+<LINK REV="made" HREF="mailto:unknown@du216771.users">
+</HEAD>
+
+<BODY>
+
+<A NAME="__index__"></A>
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#name">NAME</A></LI>
+	<LI><A HREF="#overview">OVERVIEW</A></LI>
+	<LI><A HREF="#download">DOWNLOAD</A></LI>
+	<LI><A HREF="#installation">INSTALLATION</A></LI>
+	<LI><A HREF="#implementation">IMPLEMENTATION</A></LI>
+	<UL>
+
+		<LI><A HREF="#precision">Precision</A></LI>
+		<LI><A HREF="#context">Context</A></LI>
+		<LI><A HREF="#naming convention">Naming Convention</A></LI>
+		<LI><A HREF="#mutability">Mutability</A></LI>
+		<LI><A HREF="#conversion">Conversion</A></LI>
+	</UL>
+
+	<LI><A HREF="#examples">EXAMPLES</A></LI>
+	<LI><A HREF="#verification tests">VERIFICATION TESTS</A></LI>
+	<UL>
+
+		<LI><A HREF="#unit tests">Unit Tests</A></LI>
+		<LI><A HREF="#performance tests">Performance Tests</A></LI>
+		<LI><A HREF="#compliance test">Compliance Test</A></LI>
+	</UL>
+
+	<LI><A HREF="#reference">REFERENCE</A></LI>
+	<LI><A HREF="#decimal numbers">Decimal Numbers</A></LI>
+	<LI><A HREF="#decimal contexts">Decimal Contexts</A></LI>
+	<LI><A HREF="#random states">Random States</A></LI>
+	<LI><A HREF="#constants">Constants</A></LI>
+	<LI><A HREF="#rounding">Rounding</A></LI>
+	<LI><A HREF="#status flags">Status Flags</A></LI>
+	<LI><A HREF="#classifications">Classifications</A></LI>
+	<LI><A HREF="#initialization descriptors">Initialization Descriptors</A></LI>
+	<LI><A HREF="#compile time configuration">Compile time configuration</A></LI>
+	<LI><A HREF="#operations on contexts">Operations on Contexts</A></LI>
+	<UL>
+
+		<LI><A HREF="#decnumber.getcontext"><CODE>decNumber.getcontext</CODE></A></LI>
+		<LI><A HREF="#decctx:duplicate"><CODE>decctx:duplicate</CODE></A></LI>
+		<LI><A HREF="#decctx:setcontext"><CODE>decctx:setcontext</CODE></A></LI>
+		<LI><A HREF="#decctx:setdefault"><CODE>decctx:setdefault</CODE></A></LI>
+		<LI><A HREF="#decctx:getclamp"><CODE>decctx:getclamp</CODE></A></LI>
+		<LI><A HREF="#decctx:getdigits"><CODE>decctx:getdigits</CODE></A></LI>
+		<LI><A HREF="#decctx:getemax"><CODE>decctx:getemax</CODE></A></LI>
+		<LI><A HREF="#decctx:getemin"><CODE>decctx:getemin</CODE></A></LI>
+		<LI><A HREF="#decctx:getround"><CODE>decctx:getround</CODE></A></LI>
+		<LI><A HREF="#decctx:getstatus"><CODE>decctx:getstatus</CODE></A></LI>
+		<LI><A HREF="#decctx:getstatusstring"><CODE>decctx:getstatusstring</CODE></A></LI>
+		<LI><A HREF="#decctx:gettraps"><CODE>decctx:gettraps</CODE></A></LI>
+		<LI><A HREF="#decctx:setclamp"><CODE>decctx:setclamp</CODE></A></LI>
+		<LI><A HREF="#decctx:setdigits"><CODE>decctx:setdigits</CODE></A></LI>
+		<LI><A HREF="#decctx:setemax"><CODE>decctx:setemax</CODE></A></LI>
+		<LI><A HREF="#decctx:setemin"><CODE>decctx:setemin</CODE></A></LI>
+		<LI><A HREF="#decctx:setround"><CODE>decctx:setround</CODE></A></LI>
+		<LI><A HREF="#decctx:setstatus"><CODE>decctx:setstatus</CODE></A></LI>
+		<LI><A HREF="#decctx:setstatusstring"><CODE>decctx:setstatusstring</CODE></A></LI>
+		<LI><A HREF="#decctx:settraps"><CODE>decctx:settraps</CODE></A></LI>
+	</UL>
+
+	<LI><A HREF="#operations on numbers">Operations on Numbers</A></LI>
+	<UL>
+
+		<LI><A HREF="#decnum:__concat"><CODE>decnum:__concat</CODE></A></LI>
+		<LI><A HREF="#decnum:toengstring"><CODE>decnum:toengstring</CODE></A></LI>
+		<LI><A HREF="#decnumber.tonumber"><CODE>decNumber.tonumber</CODE></A></LI>
+		<LI><A HREF="#decnum:tostring"><CODE>decnum:tostring</CODE></A></LI>
+		<LI><A HREF="#decnum:abs"><CODE>decnum:abs</CODE></A></LI>
+		<LI><A HREF="#decnum:add"><CODE>decnum:add</CODE></A></LI>
+		<LI><A HREF="#decnum:copy"><CODE>decnum:copy</CODE></A></LI>
+		<LI><A HREF="#decnum:copyabs"><CODE>decnum:copyabs</CODE></A></LI>
+		<LI><A HREF="#decnum:copynegate"><CODE>decnum:copynegate</CODE></A></LI>
+		<LI><A HREF="#decnum:copysign"><CODE>decnum:copysign</CODE></A></LI>
+		<LI><A HREF="#decnum:divide"><CODE>decnum:divide</CODE></A></LI>
+		<LI><A HREF="#decnum:divideinteger"><CODE>decnum:divideinteger</CODE></A></LI>
+		<LI><A HREF="#decnum:exp"><CODE>decnum:exp</CODE></A></LI>
+		<LI><A HREF="#decnum:floor"><CODE>decnum:floor</CODE></A></LI>
+		<LI><A HREF="#decnum:fma"><CODE>decnum:fma</CODE></A></LI>
+		<LI><A HREF="#decnum:invert"><CODE>decnum:invert</CODE></A></LI>
+		<LI><A HREF="#decnum:land"><CODE>decnum:land</CODE></A></LI>
+		<LI><A HREF="#decnum:ln"><CODE>decnum:ln</CODE></A></LI>
+		<LI><A HREF="#decnum:log10"><CODE>decnum:log10</CODE></A></LI>
+		<LI><A HREF="#decnum:logb"><CODE>decnum:logb</CODE></A></LI>
+		<LI><A HREF="#decnum:lor"><CODE>decnum:lor</CODE></A></LI>
+		<LI><A HREF="#decnum:max"><CODE>decnum:max</CODE></A></LI>
+		<LI><A HREF="#decnum:maxmag"><CODE>decnum:maxmag</CODE></A></LI>
+		<LI><A HREF="#decnum:min"><CODE>decnum:min</CODE></A></LI>
+		<LI><A HREF="#decnum:minmag"><CODE>decnum:minmag</CODE></A></LI>
+		<LI><A HREF="#decnum:minus"><CODE>decnum:minus</CODE></A></LI>
+		<LI><A HREF="#decnum:mod"><CODE>decnum:mod</CODE></A></LI>
+		<LI><A HREF="#decnum:multiply"><CODE>decnum:multiply</CODE></A></LI>
+		<LI><A HREF="#decnum:nextminus"><CODE>decnum:nextminus</CODE></A></LI>
+		<LI><A HREF="#decnum:nextplus"><CODE>decnum:nextplus</CODE></A></LI>
+		<LI><A HREF="#decnum:nexttoward"><CODE>decnum:nexttoward</CODE></A></LI>
+		<LI><A HREF="#decnum:normalize"><CODE>decnum:normalize</CODE></A></LI>
+		<LI><A HREF="#decnum:plus"><CODE>decnum:plus</CODE></A></LI>
+		<LI><A HREF="#decnum:power"><CODE>decnum:power</CODE></A></LI>
+		<LI><A HREF="#decnum:quantize"><CODE>decnum:quantize</CODE></A></LI>
+		<LI><A HREF="#decnum:remainder"><CODE>decnum:remainder</CODE></A></LI>
+		<LI><A HREF="#decnum:remaindernear"><CODE>decnum:remaindernear</CODE></A></LI>
+		<LI><A HREF="#decnum:rescale"><CODE>decnum:rescale</CODE></A></LI>
+		<LI><A HREF="#decnum:rotate"><CODE>decnum:rotate</CODE></A></LI>
+		<LI><A HREF="#decnum:samequantum"><CODE>decnum:samequantum</CODE></A></LI>
+		<LI><A HREF="#decnum:scaleb"><CODE>decnum:scaleb</CODE></A></LI>
+		<LI><A HREF="#decnum:shift"><CODE>decnum:shift</CODE></A></LI>
+		<LI><A HREF="#decnum:squareroot"><CODE>decnum:squareroot</CODE></A></LI>
+		<LI><A HREF="#decnum:subtract"><CODE>decnum:subtract</CODE></A></LI>
+		<LI><A HREF="#decnum:tointegralexact"><CODE>decnum:tointegralexact</CODE></A></LI>
+		<LI><A HREF="#decnum:tointegralvalue"><CODE>decnum:tointegralvalue</CODE></A></LI>
+		<LI><A HREF="#decnum:trim"><CODE>decnum:trim</CODE></A></LI>
+		<LI><A HREF="#decnum:xor"><CODE>decnum:xor</CODE></A></LI>
+		<LI><A HREF="#decnum:class"><CODE>decnum:class</CODE></A></LI>
+		<LI><A HREF="#decnum:classasstring"><CODE>decnum:classasstring</CODE></A></LI>
+		<LI><A HREF="#classtostring"><CODE>classtostring</CODE></A></LI>
+		<LI><A HREF="#decnum:compare"><CODE>decnum:compare</CODE></A></LI>
+		<LI><A HREF="#decnum:comparetotal"><CODE>decnum:comparetotal</CODE></A></LI>
+		<LI><A HREF="#decnum:comparetotalmag"><CODE>decnum:comparetotalmag</CODE></A></LI>
+		<LI><A HREF="#decnum:eq"><CODE>decnum:eq</CODE></A></LI>
+		<LI><A HREF="#decnum:iscanonical"><CODE>decnum:iscanonical</CODE></A></LI>
+		<LI><A HREF="#decnum:isfinite"><CODE>decnum:isfinite</CODE></A></LI>
+		<LI><A HREF="#decnum:isinfinite"><CODE>decnum:isinfinite</CODE></A></LI>
+		<LI><A HREF="#decnum:isnan"><CODE>decnum:isnan</CODE></A></LI>
+		<LI><A HREF="#decnum:isnegative"><CODE>decnum:isnegative</CODE></A></LI>
+		<LI><A HREF="#decnum:isnormal"><CODE>decnum:isnormal</CODE></A></LI>
+		<LI><A HREF="#decnum:isqnan"><CODE>decnum:isqnan</CODE></A></LI>
+		<LI><A HREF="#decnum:issnan"><CODE>decnum:issnan</CODE></A></LI>
+		<LI><A HREF="#decnum:isspecial"><CODE>decnum:isspecial</CODE></A></LI>
+		<LI><A HREF="#decnum:issubnormal"><CODE>decnum:issubnormal</CODE></A></LI>
+		<LI><A HREF="#decnum:iszero"><CODE>decnum:iszero</CODE></A></LI>
+		<LI><A HREF="#decnum:le"><CODE>decnum:le</CODE></A></LI>
+		<LI><A HREF="#decnum:lt"><CODE>decnum:lt</CODE></A></LI>
+		<LI><A HREF="#decnum:radix"><CODE>decnum:radix</CODE></A></LI>
+	</UL>
+
+	<LI><A HREF="#operations on random states">Operations on Random States</A></LI>
+	<UL>
+
+		<LI><A HREF="#decnumber.randomstate"><CODE>decNumber.randomstate</CODE></A></LI>
+		<LI><A HREF="#decrst:__call"><CODE>decrst:__call</CODE></A></LI>
+	</UL>
+
+	<LI><A HREF="#version">VERSION</A></LI>
+	<LI><A HREF="#credits">CREDITS</A></LI>
+	<LI><A HREF="#license">LICENSE</A></LI>
+	<UL>
+
+		<LI><A HREF="#icu license  icu 1.8.1 and later">ICU License - ICU 1.8.1 and later</A></LI>
+		<LI><A HREF="#ldecnumber license">ldecNumber License</A></LI>
+	</UL>
+
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="name">NAME</A></H1>
+<P><STRONG>ldecNumber</STRONG> - a Lua 5.1 wrapper for the Decimal Number library 
+<STRONG>decNumber</STRONG></P>
+<P>
+<HR>
+<H1><A NAME="overview">OVERVIEW</A></H1>
+<P>The <STRONG>ldecNumber</STRONG> package is a Lua module for General Decimal Arithmetic.
+For the background and rationale for the design of the arithmetic, see 
+Decimal Floating-Point: Algorism for Computers in the Proceedings of 
+the 16th IEEE Symposium on Computer Arithmetic (Cowlishaw, M. F., 
+2003). <A HREF="http://www2.hursley.ibm.com/decimal/IEEE-cowlishaw-arith16.pdf">http://www2.hursley.ibm.com/decimal/IEEE-cowlishaw-arith16.pdf</A>
+The <STRONG>decNumber</STRONG> package, an arbitrary-precision implementation of 
+the specifications in ANSI C, provides a reference implementation for 
+both the arithmetic and the encodings, and is used as the basis for 
+the <STRONG>ldecNumber</STRONG> package. See Mike Cowlishaw's decimal page 
+<A HREF="http://www2.hursley.ibm.com/decimal/">http://www2.hursley.ibm.com/decimal/</A> 
+for more information and the latest versions of the <STRONG>decNumber</STRONG> 
+package and test code.</P>
+<P>The <STRONG>ldecNumber</STRONG> package was designed to provide the arithmetic 
+facilities of the <STRONG>decNumber</STRONG> package with a Lua flavor. It is a 
+loadable Lua module, designed for Lua 5.1.</P>
+<P>
+<HR>
+<H1><A NAME="download">DOWNLOAD</A></H1>
+<P><STRONG>ldecNumber</STRONG> source code can be downloaded from its 
+LuaForge (<A HREF="http://luaforge.net/projects/ldecnumber/">http://luaforge.net/projects/ldecnumber/</A>) page.</P>
+<P>The source code from the <STRONG>decNumber</STRONG> package and the decTest package are 
+included in the <STRONG>ldecNumber</STRONG> distribution for a few reasons:</P>
+<OL>
+<LI>
+A couple of minor modifications were made to decTest to correct syntax 
+errors.
+<P></P>
+<LI>
+The <STRONG>decNumber</STRONG> package is fairly small, and including it is a 
+convenience to users as well as a means of documenting exactly the 
+code used to build and test the <STRONG>ldecNumber</STRONG> package
+<P></P>
+<LI>
+IBM's liberal ICU License allows me to do so!
+<P></P></OL>
+<P>The distribution also includes a copy of the decNumber C library 
+User's Guide, <EM>decNumber.pdf</EM>. This is the best reference for the 
+specification of most of the functions included in the <CODE>decNumber</CODE> 
+module.</P>
+<P>
+<HR>
+<H1><A NAME="installation">INSTALLATION</A></H1>
+<P>A <EM>Makefile</EM> is provided.</P>
+<P>
+<HR>
+<H1><A NAME="implementation">IMPLEMENTATION</A></H1>
+<P>A few arbitrary choices were made in the implementation of the Lua 
+wrapper.</P>
+<P>
+<H2><A NAME="precision">Precision</A></H2>
+<P>The size of structures used in the <STRONG>decNumber</STRONG> package determines the 
+maximum number of decimal digits in decimal numbers it can manipulate.  
+The default build of the <CODE>decNumber</CODE> module is configured for 69 digits. 
+This number was chosen for a couple reasons: the resulting structure 
+size is between 57 and 64 bytes in size (so each decimal number takes 
+this this much space), and this precision is a bit more than twice 
+what is needed for Decimal128 external format. Providing twice the 
+external format's precision seemed like a good practice for mitigation 
+of rounding issues during calculations with these numbers.</P>
+<P><EM>Note: the <STRONG>ldecNumber</STRONG> package does not yet support any external binary 
+formats, such as Decimal128, though it may in the future. Presently 
+Lua strings and Lua numbers are the only ``external'' formats.</EM></P>
+<P>In any case, you may change the value of <CODE>DECNUMDIGITS</CODE> during a build 
+of  the <CODE>decNumber</CODE> module to accommodate more digits, or reduce memory 
+overhead if you need fewer digits. The  <CODE>decNumber</CODE> module has only been 
+tested with the default setting, and one or two others.</P>
+<P>
+<H2><A NAME="context">Context</A></H2>
+<P>The decNumber context provides configuration settings such as working 
+precision and rounding mode, and also holds condition flags. Functions 
+in the <STRONG>decNumber</STRONG> package take a context argument. Using this approach 
+in Lua would have made infix operator syntax impossible. This would 
+not have been very Lua-like.</P>
+<P>Instead, the  <CODE>decNumber</CODE> module automatically maintains a decNumber 
+context per Lua thread. This thread decNumber context may be modified 
+and inspected. It may also be retrieved and restored, so threads may 
+maintain multiple contexts if desired. Modifications to the context 
+in one thread do not affect the contexts in other threads, unless, of 
+course, threads explicitly retrieve, exchange, and replace their 
+contexts with a shared context. (If you don't use setcontext you 
+don't need to worry!)</P>
+<P>The default decNumber context is <CODE>DEC_INIT_DECIMAL128</CODE> as described  
+in <EM>decNumber.pdf</EM>. This default may be changed during a build of the 
+<CODE>decNumber</CODE> module by changing the value of <CODE>LDN_CONTEXT_DEFAULT</CODE>. 
+The context method setdefault may be used to initialize a context to 
+one of the well known default configurations.</P>
+<P>
+<H2><A NAME="naming convention">Naming Convention</A></H2>
+<P>Names in the <STRONG>decNumber</STRONG> package follow a convention of a 
+<CODE>decNumber</CODE> or <CODE>DEC_</CODE> prefix and mixed case, or for some constants, 
+upper case. Lua code, on the other hand, tends toward lower case 
+identifiers. I attempted to unify this by</P>
+<UL>
+<LI>
+using <CODE>decNumber</CODE> as the module name
+<P></P>
+<LI>
+stripping the prefix described above from the function 
+names and constants (since the module name prefix will typically be 
+there anyway)
+<P></P>
+<LI>
+using lower case for function names, but otherwise 
+retaining the spelling, and
+<P></P>
+<LI>
+retaining the case for constant names
+<P></P></UL>
+<P>There are two cases where in following these rules the <STRONG>decNumber</STRONG> 
+names clash with Lua reserved words <CODE>or</CODE> and <CODE>and</CODE> -- in these 
+cases the <STRONG>decNumber</STRONG> functions are called ``logical'' operations,
+so I called the functions <CODE>lor</CODE> and <CODE>land</CODE>.</P>
+<P>Wherever there was a predefined Lua metamethod, e. g., <CODE>__add</CODE>, the 
+appropriate function is bound to that name as well as the <STRONG>decNumber</STRONG> 
+package function name.</P>
+<P>Where it seemed appropriate, functions are provided both as methods 
+on decimal numbers, as well as functions in the <CODE>decNumber</CODE> module.</P>
+<P>
+<H2><A NAME="mutability">Mutability</A></H2>
+<P>The decimal numbers created by Lua are not mutable. This decision 
+was based on my judgment that the potential performance benefit, 
+mainly lower memory consumption and less garbage collection, was 
+outweighed by the safety and lack of ``surprise'' that immutability 
+provides. This makes decimal numbers compatible with Lua numbers 
+and strings, both of which are also not mutable.</P>
+<P>
+<H2><A NAME="conversion">Conversion</A></H2>
+<P>All the functions in the <CODE>decNumber</CODE> module automatically convert 
+their arguments from Lua numbers or strings as necessary to perform 
+the operation. This conversion is done with the current settings in 
+the thread decNumber context.</P>
+<P>
+<HR>
+<H1><A NAME="examples">EXAMPLES</A></H1>
+<P>The distribution contains an <EM>examples</EM> directory with Lua 
+translations of some of the C examples from the <STRONG>decNumber</STRONG> package.</P>
+<P>
+<HR>
+<H1><A NAME="verification tests">VERIFICATION TESTS</A></H1>
+<P>The distribution contains a test directory with a few test files.</P>
+<P>
+<H2><A NAME="unit tests">Unit Tests</A></H2>
+<P>File: <EM>ldecNumberUnitTest.lua</EM></P>
+<P>This is a small but expanding set of unit tests for the <CODE>decNumber</CODE> 
+module. It uses the lunit module that can be obtained from Mike 
+Roth's page <A HREF="http://www.nessie.de/mroth/lunit/">http://www.nessie.de/mroth/lunit/</A>.</P>
+<P>File: <EM>ldecNumberGausstest.lua</EM></P>
+<P>This is a small small tests for the 
+<A HREF="#decnumber.randomstate"><CODE>decNumber.randomstate</CODE></A> 
+function and use of <A HREF="#random states">Random States</A>. It defines a Gaussian random
+number generator, and tests it by graphing the result of many
+executions. It uses the <STRONG>Lua DISLIN</STRONG> library for graphing, see
+LuaForge for Lua DISLIN 
+<A HREF="http://luaforge.net/projects/ldislin/files">http://luaforge.net/projects/ldislin/files</A>.</P>
+<P>File: <EM>ldecNumberThreadsTest.lua</EM></P>
+<P>This is a simple test that the decimal context in each thread is 
+independent. It requires visual inspection of the results to verify 
+that thread 1 is rounding ROUND_HALF_DOWN and thread 2 is rounding 
+ROUND_HALF_EVEN.</P>
+<P>
+<H2><A NAME="performance tests">Performance Tests</A></H2>
+<P>File: <EM>ldecNumberPerf.lua</EM></P>
+<P>This is a simple test of the speed of some arbitrary <CODE>decNumber</CODE> 
+module functions. It was useful to confirm that  decimal context 
+caching was worthwhile. It relies on the lperformance module, which 
+is included, but has been designed for WindowsXP.</P>
+<P>
+<H2><A NAME="compliance test">Compliance Test</A></H2>
+<P>File: <EM>ldecNumberTestDriver.lua</EM></P>
+<P>This is the big test. It uses dectest sources from IBM, and has 
+over 60,000 test cases. The Lua file is a driver to execute the tests 
+specified by dectest.</P>
+<P>As of version 21 of the Lua <CODE>decNumber</CODE> module, the results for this 
+test (dectest version 2.55) are:</P>
+<P><CODE>For all 60937 tests, 59951 succeeded, 5 failed, 301 failed(conv), 644 skipped(#), 36 skipped(prec).</CODE></P>
+<P>This is as good as possible with the default configuration. What this means is:</P>
+<PRE>
+        59951 succeeded woot!
+        5 failed        these 5 tests are know to fail in the decNumber C library;
+             these edge cases are under reconsideration in the Decimal Number Specification
+        301 failed(conv)         the precision required for the operands is insufficient in the Lua wrapper
+        644 skipped(#)   the test is for NULL arguments or format conversions not supported
+        36 skipped(prec) the test called for a  precision larger than provided in the Lua wrapper</PRE>
+<P>
+<HR>
+<H1><A NAME="reference">REFERENCE</A></H1>
+<P>Here is a reference to the data types, constants, and functions in the 
+<CODE>decNumber</CODE> module. Many of these will refer to the decNumber C library 
+User's Guide, <EM>decNumber.pdf</EM>, for implementation details.</P>
+<P>The <CODE>decNumber</CODE> module defines three userdata types with their own 
+metatables. These are <A HREF="#decimal numbers">Decimal Numbers</A>, <A HREF="#decimal contexts">Decimal Contexts</A>, and 
+decimal <A HREF="#random states">Random States</A>.</P>
+<P>
+<HR>
+<H1><A NAME="decimal numbers">Decimal Numbers</A></H1>
+<P>Decimal numbers are immutable numeric values. In the default 
+configuration they can have up to 69 digits of precision, and 
+exponents of -999999999 to 999999999.</P>
+<P>Decimal numbers are created by the functions in the <CODE>decNumber</CODE> 
+module. Since any arguments to these functions may be strings, 
+Lua numbers, or decimal numbers, conversion from strings or 
+Lua numbers to decimal numbers can be achieved in may ways. 
+The function <A HREF="#decnumber.tonumber"><CODE>decNumber.tonumber</CODE></A> is 
+the most obvious.</P>
+<P>In the descriptions below, arguments or results that may be a 
+string, Lua number, or decimal number are indicated by &lt;decarg&gt; 
+whereas arguments or results that must be a  decimal number 
+are indicated by <CODE>decnum</CODE>.</P>
+<P>The metatable for decimal numbers is available as 
+<CODE>decNumber.number_metatable</CODE>.</P>
+<P>
+<HR>
+<H1><A NAME="decimal contexts">Decimal Contexts</A></H1>
+<P>Decimal contexts are mutable records that contain</P>
+<UL>
+<LI>
+flags that control behaviors of the <CODE>decNumber</CODE> module, such as 
+precision and rounding
+<P></P>
+<LI>
+conditions that report the status of sequence of operations, 
+such as overflow
+<P></P></UL>
+<P>See <A HREF="#context">Context</A> for some rational on how the <CODE>decNumber</CODE> 
+module manages contexts.</P>
+<P>In the descriptions below, arguments or results that must be a  
+decimal context are indicated by <CODE>decctx</CODE>.</P>
+<P>The metatable for decimal contexts is available as 
+<CODE>decNumber.context_metatable</CODE>.</P>
+<P>
+<HR>
+<H1><A NAME="random states">Random States</A></H1>
+<P>Random states are mutable records that contain opaque data for 
+generation of random numbers.</P>
+<P>See <A HREF="#operations on random states">Operations on Random States</A> for the description of 
+functions for creating and using random states.</P>
+<P>In the descriptions below, arguments or results that must be a  
+decimal context are indicated by <CODE>decrst</CODE>.</P>
+<P>The metatable for decimal contexts is available as 
+<CODE>decNumber.drandom_metatable</CODE>.</P>
+<P>
+<HR>
+<H1><A NAME="constants">Constants</A></H1>
+<P>Here are the constants exposed in the <CODE>decNumber</CODE> module from the 
+<STRONG>decNumber</STRONG> package.</P>
+<P>
+<HR>
+<H1><A NAME="rounding">Rounding</A></H1>
+<P>These numeric flags are used with 
+<A HREF="#decctx:setround"><CODE>decctx:setround(x)</CODE></A></P>
+<PRE>
+    decNumber.ROUND_CEILING     round towards +infinity
+    decNumber.ROUND_UP          round away from 0
+    decNumber.ROUND_HALF_UP     0.5 rounds up
+    decNumber.ROUND_HALF_EVEN   0.5 rounds to nearest even
+    decNumber.ROUND_HALF_DOWN   0.5 rounds down
+    decNumber.ROUND_DOWN        round towards 0 (truncate)
+    decNumber.ROUND_FLOOR       round towards -infinity
+    decNumber.ROUND_05UP        round for reround</PRE>
+<P>
+<HR>
+<H1><A NAME="status flags">Status Flags</A></H1>
+<P>These numeric status flags are used with 
+<A HREF="#decctx:getstatus"><CODE>decctx:getstatus()</CODE></A></P>
+<PRE>
+    decNumber.Conversion_syntax
+    decNumber.Division_by_zero
+    decNumber.Division_impossible
+    decNumber.Division_undefined
+    decNumber.Insufficient_storage
+    decNumber.Inexact
+    decNumber.Invalid_context
+    decNumber.Invalid_operation
+    decNumber.Overflow
+    decNumber.Clamped
+    decNumber.Rounded
+    decNumber.Subnormal
+    decNumber.Underflow</PRE>
+<P>These constants are combinations of the above status flags:</P>
+<PRE>
+    decNumber.IEEE_854_Division_by_zero
+    decNumber.IEEE_854_Inexact
+    decNumber.IEEE_854_Invalid_operation
+    decNumber.IEEE_854_Overflow
+    decNumber.IEEE_854_Underflow
+    decNumber.Errors       normally errors (results are qNaN, infinite, or 0)
+    decNumber.NaNs         cause a result to become qNaN
+    decNumber.Information  normally for information only (have finite results)</PRE>
+<P>
+<HR>
+<H1><A NAME="classifications">Classifications</A></H1>
+<P>These numeric classifications for decNumbers are aligned with IEEE 754r 
+and are returned by 
+<A HREF="#decnum:class"><CODE>decnum:class()</CODE></A> 
+Note that 'normal' and 'subnormal' are meaningful only with a decContext.</P>
+<PRE>
+    decNumber.CLASS_SNAN
+    decNumber.CLASS_QNAN
+    decNumber.CLASS_NEG_INF
+    decNumber.CLASS_NEG_NORMAL
+    decNumber.CLASS_NEG_SUBNORMAL
+    decNumber.CLASS_NEG_ZERO
+    decNumber.CLASS_POS_ZERO
+    decNumber.CLASS_POS_SUBNORMAL
+    decNumber.CLASS_POS_NORMAL
+    decNumber.CLASS_POS_INF</PRE>
+<P>These classifications are also returned as string values from 
+<A HREF="#decnum:classasstring"><CODE>decnum:classasstring()</CODE></A></P>
+<P>
+<HR>
+<H1><A NAME="initialization descriptors">Initialization Descriptors</A></H1>
+<P>These constants are used with 
+<A HREF="#decctx:setdefault"><CODE>decctx:setdefault(x)</CODE></A></P>
+<PRE>
+    decNumber.INIT_BASE
+    decNumber.INIT_DECIMAL32
+    decNumber.INIT_DECIMAL64
+    decNumber.INIT_DECIMAL128</PRE>
+<P>See note re: <CODE>decNumber.INIT_BASE</CODE> and traps, below in 
+<A HREF="#decctx:setdefault"><CODE>decctx:setdefault(x)</CODE></A></P>
+<P>
+<HR>
+<H1><A NAME="compile time configuration">Compile time configuration</A></H1>
+<P>These constants provide information about the compile time 
+configuration.</P>
+<PRE>
+    decNumber.MAX_DIGITS  constant DECNUMDIGITS, the maximum precision</PRE>
+<PRE>
+    decNumber.version     a string with the decNumber module version information</PRE>
+<P>
+<HR>
+<H1><A NAME="operations on contexts">Operations on Contexts</A></H1>
+<P>The following functions operate on decimal contexts. See the 
+decNumber C library User's Guide, <EM>decNumber.pdf</EM> for details 
+about contexts, and constants used for manipulating them.</P>
+<P>
+<H2><A NAME="decnumber.getcontext"><CODE>decNumber.getcontext</CODE></A></H2>
+<PRE>
+    decNumber.getcontext ()</PRE>
+<P>Returns the thread's current decimal context.</P>
+<P>
+<H2><A NAME="decctx:duplicate"><CODE>decctx:duplicate</CODE></A></H2>
+<PRE>
+    decctx:duplicate()</PRE>
+<P>Returns a copy of the decimal context argument. This may be used, 
+for example, to save and restore a context around temporary 
+modifications, or to keep multiple decimal contexts on hand for 
+quick wholesale context changes (rather than changing individual 
+fields). You probably don't ever need to do this!</P>
+<P>
+<H2><A NAME="decctx:setcontext"><CODE>decctx:setcontext</CODE></A></H2>
+<PRE>
+    decNumber.setcontext (decctx)
+    decctx:setcontext ()</PRE>
+<P>Sets the thread's decimal context to the argument, and returns 
+the previous decimal context, i. e., the one that was just replaced. 
+You probably don't ever need to do this!</P>
+<P>
+<H2><A NAME="decctx:setdefault"><CODE>decctx:setdefault</CODE></A></H2>
+<PRE>
+    decctx:setdefault (initconst)</PRE>
+<P>Initializes the context argument to the settings specified by the 
+initconst. See <A HREF="#initialization descriptors">Initialization Descriptors</A> for permitted values for 
+initconst. No values are returned.</P>
+<P>Note: since traps are not supported, <CODE>decNumber.INIT_BASE</CODE> differs 
+from the behavior documented in the decNumber C library User Guide in 
+that it leaves traps disabled.</P>
+<P>Uses the C library function <CODE>decContextDefault()</CODE>.</P>
+<P>
+<H2><A NAME="decctx:getclamp"><CODE>decctx:getclamp</CODE></A></H2>
+<PRE>
+    decctx:getclamp ()</PRE>
+<P>Returns the integer value of the <CODE>clamp</CODE> field of the context 
+argument. When 0, a result exponent is limited to <CODE>emax</CODE> (for 
+example, the exponent of a zero result will be clamped to this value). 
+When 1, a result exponent is limited to <CODE>emax-(digits-1)</CODE>.</P>
+<P>
+<H2><A NAME="decctx:getdigits"><CODE>decctx:getdigits</CODE></A></H2>
+<PRE>
+    decctx:getdigits ()</PRE>
+<P>Returns the integer value of the <CODE>digits</CODE> field of the context 
+argument. This is the working precision for this decimal context. 
+The results of decimal number operations will be rounded to this 
+length if necessary.</P>
+<P>
+<H2><A NAME="decctx:getemax"><CODE>decctx:getemax</CODE></A></H2>
+<PRE>
+    decctx:getemax ()</PRE>
+<P>Returns the integer value of the <CODE>emax</CODE> field of the context 
+argument. This is the magnitude of the largest adjusted exponent 
+that is permitted.</P>
+<P>
+<H2><A NAME="decctx:getemin"><CODE>decctx:getemin</CODE></A></H2>
+<PRE>
+    decctx:getemin ()</PRE>
+<P>Returns the integer value of the <CODE>emin</CODE> field of the context 
+argument. This is the smallest adjusted exponent that is permitted 
+for normal numbers.</P>
+<P>
+<H2><A NAME="decctx:getround"><CODE>decctx:getround</CODE></A></H2>
+<PRE>
+    decctx:getround ()</PRE>
+<P>Returns the integer value of the <CODE>round</CODE> field of the context 
+argument. See <A HREF="#rounding">Rounding</A> for possible values.</P>
+<P>
+<H2><A NAME="decctx:getstatus"><CODE>decctx:getstatus</CODE></A></H2>
+<PRE>
+    decctx:getstatus ()</PRE>
+<P>Returns the integer value of the <CODE>status</CODE> field of the context 
+argument. See <A HREF="#status flags">Status Flags</A> for possible values. In general, 
+the result will be a bitwise-or of a subset of these values.</P>
+<P>
+<H2><A NAME="decctx:getstatusstring"><CODE>decctx:getstatusstring</CODE></A></H2>
+<PRE>
+    decctx:getstatusstring ()</PRE>
+<P>Returns a string derived from the present value of the context 
+argument's status field using the C library function 
+<CODE>decContextStatusToString()</CODE>.</P>
+<P>
+<H2><A NAME="decctx:gettraps"><CODE>decctx:gettraps</CODE></A></H2>
+<PRE>
+    decctx:gettraps ()</PRE>
+<P>Returns 0 (we hope!) since traps are not implemented in the 
+Lua wrapper - use the status flags instead!</P>
+<P>
+<H2><A NAME="decctx:setclamp"><CODE>decctx:setclamp</CODE></A></H2>
+<PRE>
+    decctx:setclamp (num)</PRE>
+<P>Sets the integer value of the <CODE>clamp</CODE> field of the context 
+argument to <CODE>num</CODE>. When 0, a result exponent is limited to 
+<CODE>emax</CODE> (for example, the exponent of a zero result will be 
+clamped to this value). When 1, a result exponent is limited 
+to <CODE>emax - (digits - 1)</CODE>.</P>
+<P>Returns the previous value of the <CODE>clamp</CODE> field.</P>
+<P>Note that it is an error if num is not one of the values 0 or 1.</P>
+<P>
+<H2><A NAME="decctx:setdigits"><CODE>decctx:setdigits</CODE></A></H2>
+<PRE>
+    decctx:setdigits (num)</PRE>
+<P>Sets the integer value of the <CODE>digits</CODE> field of the context 
+argument to <CODE>num</CODE>. This is the working precision for this 
+decimal context. The results of subsequent decimal number 
+operations will be rounded to this length if necessary.</P>
+<P>Returns the previous value of the <CODE>digits</CODE> field.</P>
+<P>Note that it is an error if num exceeds <CODE>decNumber.MAX_DIGITS</CODE>.</P>
+<P>
+<H2><A NAME="decctx:setemax"><CODE>decctx:setemax</CODE></A></H2>
+<PRE>
+    decctx:setemax (num)</PRE>
+<P>Sets the integer value of the <CODE>emax</CODE> field of the context 
+argument to <CODE>num</CODE>. This is the magnitude of the largest 
+adjusted exponent that is permitted.</P>
+<P>Returns the previous value of the <CODE>emax</CODE> field.</P>
+<P>Note that it is an error if num is outside the range 
+0 though 999,999,999.</P>
+<P>
+<H2><A NAME="decctx:setemin"><CODE>decctx:setemin</CODE></A></H2>
+<PRE>
+    decctx:setemin (num)</PRE>
+<P>Sets the integer value of the <CODE>emin</CODE> field of the context 
+argument to <CODE>num</CODE>. This is the smallest adjusted exponent 
+that is permitted for normal numbers. <CODE>emin</CODE> will usually equal 
+<CODE>-emax</CODE>, but when a compressed format is used it will be 
+<CODE>-(emax-1)</CODE>.</P>
+<P>Returns the previous value of the <CODE>emin</CODE> field.</P>
+<P>Note that it is an error if num is outside the range 
+-999,999,999 though 0.</P>
+<P>
+<H2><A NAME="decctx:setround"><CODE>decctx:setround</CODE></A></H2>
+<PRE>
+    decctx:setround (rounding)</PRE>
+<P>Sets the integer value of the <CODE>round</CODE> field of the context 
+argument to <CODE>rounding</CODE>. This is used to select the rounding 
+algorithm to be used if rounding is necessary during subsequent 
+decimal number operations.</P>
+<P>Returns the previous value of the <CODE>round</CODE> field.</P>
+<P>Note that it is an error if rounding is not one of the values 
+described in <A HREF="#rounding">Rounding</A>.</P>
+<P>
+<H2><A NAME="decctx:setstatus"><CODE>decctx:setstatus</CODE></A></H2>
+<PRE>
+    decctx:setstatus (flags)</PRE>
+<P>Sets the integer value of the <CODE>status</CODE> field of the context 
+argument to <CODE>flags</CODE>. See <A HREF="#status flags">Status Flags</A> for possible values. 
+In general, the flags will be a bitwise-or of a subset of these 
+values. Usually the <CODE>flags</CODE> are 0 to clear all conditions.</P>
+<P>Returns the previous value of  the status  field.</P>
+<P>Note that it is an error if flags is not a bitwise-or of a subset 
+of the values in <A HREF="#status flags">Status Flags</A>.</P>
+<P>
+<H2><A NAME="decctx:setstatusstring"><CODE>decctx:setstatusstring</CODE></A></H2>
+<PRE>
+    decctx:setstatusstring (flagname)</PRE>
+<P>Sets the decimal context's status bit corresponding to the name 
+string argument <CODE>flagname</CODE> using the C library function 
+<CODE>decContextSetStatusFromString()</CODE>.</P>
+<P>
+<H2><A NAME="decctx:settraps"><CODE>decctx:settraps</CODE></A></H2>
+<PRE>
+    decctx:settraps (flags)</PRE>
+<P>Sets the integer value of the <CODE>traps</CODE> field of the context 
+argument to <CODE>flags</CODE>.</P>
+<P>Note that it is an error if <CODE>flags</CODE> is not zero since traps 
+are not implemented in the Lua wrapper - use the status 
+flags instead!</P>
+<P>
+<HR>
+<H1><A NAME="operations on numbers">Operations on Numbers</A></H1>
+<P>The following functions operate on decimal numbers. In the 
+descriptions below, arguments or results that may be a string, 
+Lua number, or decimal number are indicated by <CODE>decarg</CODE> whereas 
+arguments or results that must be a decimal number are indicated by 
+<CODE>decnum</CODE>. See <A HREF="#decimal numbers">Decimal Numbers</A>.</P>
+<P>See the decNumber C library User's Guide, <EM>decNumber.pdf</EM> for 
+details about limitations of the functions, and behavior in 
+exceptional situations.</P>
+<P><STRONG>Conversions</STRONG></P>
+<P>
+<H2><A NAME="decnum:__concat"><CODE>decnum:__concat</CODE></A></H2>
+<PRE>
+    decnum:__concat (&lt;string&gt;)</PRE>
+<P>Returns a string representing the value of the decimal number 
+argument concatenated with the string argument. See 
+<A HREF="#decnum:tostring"><CODE>decnum:tostring</CODE></A> below for a description 
+of the conversion operation.</P>
+<P>Note that by binding the method __concat to this function, the 
+Lua <CODE>..</CODE> concatenation operator will work with a decimal number 
+and a string, in either order, due to Lua's internal application 
+of this method when one side of the <CODE>..</CODE> concatenation operator 
+is a decimal number.</P>
+<P>Uses the C library function <CODE>decNumberToString()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:toengstring"><CODE>decnum:toengstring</CODE></A></H2>
+<PRE>
+    decnum:toengstring ()
+    decNumber.toengstring (decarg)</PRE>
+<P>Returns a string representing the value of the argument (converted 
+to a decimal number first if necessary) using engineering notation 
+(where the exponent will be a multiple of three, and there may be 
+up to three digits before any decimal point) if an exponent is needed. 
+It implements the to-engineering-string conversion.</P>
+<P>Uses the C library function decNumberToEngString().</P>
+<P>
+<H2><A NAME="decnumber.tonumber"><CODE>decNumber.tonumber</CODE></A></H2>
+<PRE>
+    decNumber.tonumber (decarg)</PRE>
+<P>Returns a decimal number. If the argument is a decimal number, it is 
+simply returned. If the argument is a Lua number or string, it is 
+converted, using the present decimal context as usual, to a decimal 
+number and this value is returned.</P>
+<P>Uses the C library function <CODE>decNumberFromString()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:tostring"><CODE>decnum:tostring</CODE></A></H2>
+<PRE>
+    decnum:tostring ()
+    decnum:__tostring ()
+    decNumber.tostring (decarg)</PRE>
+<P>Returns a string representing the value of the argument (converted to 
+a decimal number first if necessary) using scientific notation if an 
+exponent is needed (that is, there will be just one digit before any 
+decimal point). It implements the to-scientific-string conversion.</P>
+<P>Note that by binding the method <CODE>__tostring</CODE> to this function, the 
+Lua <CODE>print</CODE> and <CODE>tostring</CODE> functions will work with decimal numbers, 
+using this conversion function.</P>
+<P>Uses the C library function <CODE>decNumberToString()</CODE>.</P>
+<P><STRONG>Operations</STRONG></P>
+<P>
+<H2><A NAME="decnum:abs"><CODE>decnum:abs</CODE></A></H2>
+<PRE>
+    decnum:abs ()
+    decNumber.abs (decarg)</PRE>
+<P>Returns a decimal number that is the absolute value of the argument.</P>
+<P>Uses the C library function <CODE>decNumberAbs()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:add"><CODE>decnum:add</CODE></A></H2>
+<PRE>
+    decnum:add (decarg)
+    decnum:__add (decarg)
+    decNumber.add (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the sum of its arguments.</P>
+<P>Note that by binding the method <CODE>__add</CODE> to this function, the 
+Lua addition operator (<CODE>+</CODE>) may be used with a <CODE>decnum</CODE> on the 
+left and a <CODE>decarg</CODE> on the right.</P>
+<P>Uses the C library function <CODE>decNumberAdd()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:copy"><CODE>decnum:copy</CODE></A></H2>
+<PRE>
+    decnum:copy ()
+    decNumber.copy (decarg)</PRE>
+<P>Returns a decimal number that is a copy of its argument. This is 
+not too useful since <CODE>decnum</CODE>s are immutable in <STRONG>ldecNumber</STRONG>,
+but it could be used as an alternative to 
+<A HREF="#decnum:tonumber"><CODE>decnum:tonumber</CODE></A>
+No error is possible from this function when its argument is a 
+<CODE>decnum</CODE>.</P>
+<P>Uses the C library function <CODE>decNumberCopy()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:copyabs"><CODE>decnum:copyabs</CODE></A></H2>
+<PRE>
+    decnum:copyabs ()
+    decNumber.copyabs (decarg)</PRE>
+<P>Returns a decimal number that is the absolute value of its argument.
+This is the quiet <CODE>abs</CODE> function described in IEEE 754r.
+No error is possible from this function when its argument is a 
+<CODE>decnum</CODE>.</P>
+<P>Uses the C library function <CODE>decNumberCopyAbs()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:copynegate"><CODE>decnum:copynegate</CODE></A></H2>
+<PRE>
+    decnum:copynegate ()
+    decNumber.copynegate (decarg)</PRE>
+<P>Returns a decimal number that is the negation of its argument, in
+other words it returns a copy of its argument with the sign inverted.
+This is the quiet <CODE>negate</CODE> function described in IEEE 754r.
+No error is possible from this function when its argument is a 
+<CODE>decnum</CODE>.</P>
+<P>Uses the C library function <CODE>decNumberCopyNegate()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:copysign"><CODE>decnum:copysign</CODE></A></H2>
+<PRE>
+    decnum:copysign (decarg)
+    decNumber.copysign (decarg, decarg)</PRE>
+<P>Returns a decimal number that is a copy of its first argument but 
+with the sign of its second argument.
+This is the quiet <CODE>copysign</CODE> function described in IEEE 754r.
+No error is possible from this function when its arguments are 
+both <CODE>decnum</CODE>s.</P>
+<P>Uses the C library function <CODE>decNumberCopySign()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:divide"><CODE>decnum:divide</CODE></A></H2>
+<PRE>
+    decnum:divide (decarg)
+    decnum:__div (decarg)
+    decNumber.divide (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the left (1st) argument divided 
+by the right (2nd) argument.</P>
+<P>Note that by binding the method <CODE>__div</CODE> to this function, the 
+Lua division operator (<CODE>/</CODE>) may be used with a <CODE>decnum</CODE> on the 
+left and a <CODE>decarg</CODE> on the right.</P>
+<P>Uses the C library function <CODE>decNumberDivide()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:divideinteger"><CODE>decnum:divideinteger</CODE></A></H2>
+<PRE>
+    decnum:divideinteger (decarg)
+    decNumber.divideinteger (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the integer part of the result 
+of dividing of its arguments. Note that, per the <STRONG>decNumber</STRONG> 
+specification, this is a convert to integer by truncation. If 
+you want some other rounding mode, use <A HREF="#decnum:floor"><CODE>decnum:floor</CODE></A>, 
+or for any rounding mode use 
+<A HREF="#decnum:tointegralvalue"><CODE>decnum:tointegralvalue</CODE></A>
+or <A HREF="#decnum:quantize"><CODE>decnum:quantize</CODE></A>.</P>
+<P>Uses the C library function <CODE>decNumberDivideInteger()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:exp"><CODE>decnum:exp</CODE></A></H2>
+<PRE>
+    decnum:exp ()
+    decNumber.exp (decarg)</PRE>
+<P>Returns a decimal number that is e raised to the power of the argument.</P>
+<P>Uses the C library function <CODE>decNumberExp()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:floor"><CODE>decnum:floor</CODE></A></H2>
+<PRE>
+    decnum:floor (decarg)
+    decNumber.floor (decarg, decarg)</PRE>
+<P>Returns a decimal number integer that is the floor of the left (1st) 
+argument divided by the right (2nd) argument. Contrast this with 
+<A HREF="#decnum:divideinteger"><CODE>decnum:divideinteger</CODE></A> which uses truncation.</P>
+<P>The floor function is implemented as equal to 
+<A HREF="#decnum:divideinteger"><CODE>decnum:divideinteger</CODE></A> if the signs of the 
+arguments are the same or if the remainder is zero, otherwise as equal 
+to the <A HREF="#decnum:divideinteger"><CODE>decnum:divideinteger</CODE></A> result minus 1. 
+The current context's rounding mode is used. 
+See <A HREF="#decnum:mod"><CODE>decnum:mod</CODE></A>.</P>
+<P>Uses the C library function <CODE>decNumberDivideInteger()</CODE>, and then 
+<CODE>decNumberMultiply()</CODE> followed by <CODE>decNumberCompare() decNumberIsZero()</CODE> 
+to check if the remainder is zero, and <CODE>decNumberSubtract()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:fma"><CODE>decnum:fma</CODE></A></H2>
+<PRE>
+    decnum:fma (decarg,decarg)
+    decNumber.fma (decarg, decarg, decarg)</PRE>
+<P>Returns a decimal number that is the result of multiplying the first
+argument by the second argument and then adding the third argument to 
+that intermediate result. It is equivalent to a multiplication followed 
+by an addition except that the intermediate result is not rounded and 
+will not cause overflow or underflow. That is, only the final result 
+is rounded and checked.</P>
+<P>Uses the C library function <CODE>decNumberFMA()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:invert"><CODE>decnum:invert</CODE></A></H2>
+<PRE>
+    decnum:invert ()
+    decNumber.invert (decarg)</PRE>
+<P>Returns a decimal number that is the result of the digit-wise logical 
+inversion of the argument (a 0 digit becomes 1 and vice versa).</P>
+<P>Uses the C library function <CODE>decNumberInvert()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:land"><CODE>decnum:land</CODE></A></H2>
+<PRE>
+    decnum:land (decarg)
+    decNumber.land (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the digit-wise logical and of the 
+arguments. Note that all digits of the arguments must be 0 or 1 or
+else this operation returns NaN,</P>
+<P>Uses the C library function <CODE>decNumberAnd()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:ln"><CODE>decnum:ln</CODE></A></H2>
+<PRE>
+    decnum:ln ()
+    decNumber.ln (decarg)</PRE>
+<P>Returns a decimal number that is the natural logarithm (logarithm in 
+base e) of the argument.</P>
+<P>Uses the C library function <CODE>decNumberLn()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:log10"><CODE>decnum:log10</CODE></A></H2>
+<PRE>
+    decnum:log10 ()
+    decNumber.log10 (decarg)</PRE>
+<P>Returns a decimal number that is the logarithm in base ten of the 
+argument.</P>
+<P>Uses the C library function <CODE>decNumberLog10()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:logb"><CODE>decnum:logb</CODE></A></H2>
+<PRE>
+    decnum:logb ()
+    decNumber.logb (decarg)</PRE>
+<P>Returns a decimal number that is the adjusted exponent of the 
+argument, according to the rules for the <CODE>logB</CODE> operation of the 
+IEEE 754r proposal. This returns the exponent of the argument as 
+though its decimal point had been moved to follow the first digit 
+while keeping the same value. The result is not limited by 
+<CODE>emin</CODE> or <CODE>emax</CODE>.</P>
+<P>Uses the C library function <CODE>decNumberLogB()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:lor"><CODE>decnum:lor</CODE></A></H2>
+<PRE>
+    decnum:lor (decarg)
+    decNumber.lor (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the digit-wise logical inclusive or 
+of the arguments. Note that all digits of the arguments must be 0 or 
+1 or else this operation returns NaN,</P>
+<P>Uses the C library function <CODE>decNumberOr()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:max"><CODE>decnum:max</CODE></A></H2>
+<PRE>
+    decnum:max (decarg)
+    decNumber.max (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the maximum of its arguments.</P>
+<P>Uses the C library function <CODE>decNumberMax()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:maxmag"><CODE>decnum:maxmag</CODE></A></H2>
+<PRE>
+    decnum:maxmag (decarg)
+    decNumber.maxmag (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the one of its arguments that 
+has the maximum magnitude. It is identical to 
+<A HREF="#decnum:max"><CODE>decnum:max</CODE></A> except that the signs of the operands 
+are ignored and taken to be 0 (non-negative).</P>
+<P>Uses the C library function <CODE>decNumberMaxMag()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:min"><CODE>decnum:min</CODE></A></H2>
+<PRE>
+    decnum:min (decarg)
+    decNumber.min (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the minimum of its arguments.</P>
+<P>Uses the C library function <CODE>decNumberMin()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:minmag"><CODE>decnum:minmag</CODE></A></H2>
+<PRE>
+    decnum:minmag (decarg)
+    decNumber.minmag (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the one of its arguments that 
+has the minimum magnitude. It is identical to 
+<A HREF="#decnum:min"><CODE>decnum:min</CODE></A> except that the signs of the operands 
+are ignored and taken to be 0 (non-negative).</P>
+<P>Uses the C library function <CODE>decNumberMinMag()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:minus"><CODE>decnum:minus</CODE></A></H2>
+<PRE>
+    decnum:minus ()
+    decnum:__unm ()
+    decNumber.minus (decarg)</PRE>
+<P>Returns a decimal number that is the result of subtracting 
+the argument from 0.</P>
+<P>Note that by binding the method <CODE>__unm</CODE> to this function, the 
+Lua unary minus operator (<CODE>-</CODE>) may be used with decimal numbers.</P>
+<P>Uses the C library function <CODE>decNumberMinus()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:mod"><CODE>decnum:mod</CODE></A></H2>
+<PRE>
+    decnum:mod (decarg)
+    decnum:__mod (decarg)
+    decNumber.mod (decarg, decarg)</PRE>
+<P>Returns a decimal number that is remainder of the left (1st) 
+argument divided by the right (2nd) argument based on Lua rules 
+for the mod operator (<CODE>%</CODE>). Lua defines</P>
+<PRE>
+    a % b == a - floor(a/b)*b</PRE>
+<P>whereas the General Decimal Arithmetic Specification defines 
+remainder using truncation.</P>
+<P>The <CODE>mod</CODE> function is implemented as equal to 
+<A HREF="#decnum:remainder"><CODE>decnum:remainder</CODE></A> if the signs of the 
+arguments are the same or the remainder is zero, otherwise as 
+equal to the remainder plus the divisor. The current context's 
+rounding mode is used.</P>
+<P>Note that by binding the method <CODE>__mod</CODE> to this function, the 
+Lua modulo operator (<CODE>%</CODE>) may be used with a <CODE>decnum</CODE> on the 
+left and a <CODE>decarg</CODE> on the right.</P>
+<P>Uses the C library functions <CODE>decNumberRemainder()</CODE>, 
+<CODE>decNumberIsNegative()</CODE>, <CODE>decNumberIsZero()</CODE>, and <CODE>decNumberAdd()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:multiply"><CODE>decnum:multiply</CODE></A></H2>
+<PRE>
+    decnum:multiply (decarg)
+    decnum:__mul (decarg)
+    decNumber.multiply (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the product of its arguments.</P>
+<P>Note that by binding the method <CODE>__mul</CODE> to this function, the Lua 
+multiplication operator (<CODE>*</CODE>) may be used with a <CODE>decnum</CODE> on the 
+left and a <CODE>decarg</CODE> on the right.</P>
+<P>Uses the C library function <CODE>decNumberMultiply()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:nextminus"><CODE>decnum:nextminus</CODE></A></H2>
+<PRE>
+    decnum:nextminus ()
+    decNumber.nextminus (decarg)</PRE>
+<P>Returns a decimal number that is the closest value to the argument 
+in the direction of -Infinity. This is computed as though by 
+subtracting an infinitesimal amount from the argument 
+using <CODE>ROUND_FLOOR</CODE>, except that no flags are set as long as the 
+argument is a <CODE>decnum</CODE> (unless the argument is a signaling NaN).</P>
+<P>This function is a generalization of the IEEE 754 <CODE>nextDown</CODE> 
+operation.</P>
+<P>Uses the C library function <CODE>decNumberNextMinus()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:nextplus"><CODE>decnum:nextplus</CODE></A></H2>
+<PRE>
+    decnum:nextplus ()
+    decNumber.nextplus (decarg)</PRE>
+<P>Returns a decimal number that is the closest value to the argument 
+in the direction of +Infinity. This is computed as though by 
+adding an infinitesimal amount from the argument 
+using <CODE>ROUND_CEILING</CODE>, except that no flags are set as long as the 
+argument is a <CODE>decnum</CODE> (unless the argument is a signaling NaN).</P>
+<P>This function is a generalization of the IEEE 754 <CODE>nextUp</CODE> 
+operation.</P>
+<P>Uses the C library function <CODE>decNumberNextPlus()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:nexttoward"><CODE>decnum:nexttoward</CODE></A></H2>
+<PRE>
+    decnum:nexttoward (decarg)
+    decNumber.nexttoward (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the closest value to the first 
+argument in the direction of the second argument. This is computed 
+as though by adding or subtracting an infinitesimal amount to the 
+first argument using either <CODE>ROUND_CEILING</CODE> or <CODE>ROUND_FLOOR</CODE>
+depending on whether the second argument is larger or smaller than
+the first argument. If the arguments are numerically equal, then 
+the result is a copy of the first argument with the sign of the 
+second argument. Flags are set as usual for an addition or 
+subtraction (no flags are set in the equals case).</P>
+<P>This function is a generalization of the IEEE 754 <CODE>nextAfter</CODE> 
+operation.</P>
+<P>Uses the C library function <CODE>decNumberNextToward()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:normalize"><CODE>decnum:normalize</CODE></A></H2>
+<PRE>
+    decnum:normalize ()
+    decNumber.normalize (decarg)</PRE>
+<P>Returns a decimal number that is the result of adding the argument 
+to 0, and putting the result in its simplest form. That is, a non-zero 
+number which has any trailing zeros in the coefficient has those zeros 
+removed by dividing the coefficient by the appropriate power of ten 
+and adjusting the exponent accordingly, and a zero has its exponent 
+set to 0.</P>
+<P>Uses the C library function <CODE>decNumberNormalize()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:plus"><CODE>decnum:plus</CODE></A></H2>
+<PRE>
+    decnum:plus ()
+    decNumber.plus (decarg)</PRE>
+<P>Returns a decimal number that is the result of adding the argument 
+to 0. This takes place according to the settings given in the 
+decimal context, following the usual arithmetic rules. This may 
+therefore be used for rounding.</P>
+<P>Uses the C library function <CODE>decNumberPlus()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:power"><CODE>decnum:power</CODE></A></H2>
+<PRE>
+    decnum:power (decarg)
+    decnum:__pow (decarg)
+    decNumber.power (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the left (1st) argument raised to 
+the power of the right (2nd) argument.</P>
+<P>Note that by binding the method <CODE>__pow</CODE> to this function, the Lua 
+power operator (<CODE>^</CODE>) may be used with a <CODE>decnum</CODE> on the left 
+and a <CODE>decarg</CODE> on the right.</P>
+<P>Uses the C library function <CODE>decNumberPower()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:quantize"><CODE>decnum:quantize</CODE></A></H2>
+<PRE>
+    decnum:quantize (decarg)
+    decNumber.quantize (decarg, decarg)</PRE>
+<P>Returns a decimal number that is numerically equal (except for 
+any rounding) to the left (1st) argument but modified so its 
+exponent has a specific value, equal to that of the right (2nd) 
+argument. To achieve this, the coefficient of the result is 
+adjusted (by rounding or shifting) so that its exponent has the 
+requested value. For example, if the left (1st) argument had 
+the value 123.4567, and the right (2nd) argument had the 
+value 0.12, the result would be 123.46 (that is, 12346 with an 
+exponent of -2, matching the right (2nd) argument).</P>
+<P>Uses the C library function <CODE>decNumberQuantize()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:remainder"><CODE>decnum:remainder</CODE></A></H2>
+<PRE>
+    decnum:remainder (decarg)
+    decNumber.remainder (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the remainder of the left (1st) 
+argument divided by the right (2nd) argument. The identity</P>
+<PRE>
+    lhs == (lhs:divideinteger(rhs) * rhs) + lhs:remainder(rhs)</PRE>
+<P>holds.</P>
+<P>Uses the C library function <CODE>decNumberRemainder()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:remaindernear"><CODE>decnum:remaindernear</CODE></A></H2>
+<PRE>
+    decnum:remaindernear (decarg)
+    decNumber.remaindernear (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the remainder of the left (1st) 
+argument divided by the right (2nd) argument using the rules 
+defined in IEEE 854. This follows the same definition as 
+<A HREF="#decnum:remainder"><CODE>decnum:remainder</CODE></A>, except that the nearest 
+integer quotient (or the nearest even integer if the remainder 
+is equidistant from two) is used instead of the result from 
+<A HREF="#decnum:divideinteger"><CODE>decnum:divideinteger</CODE></A>.</P>
+<P>For example, <CODE>decNumber.remaindernear(10, 6)</CODE> has the result -2 
+(instead of 4) because the multiple of 6 nearest to 10 is 12 
+(rather than 6).</P>
+<P>Uses the C library function <CODE>decNumberRemainderNear()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:rescale"><CODE>decnum:rescale</CODE></A></H2>
+<PRE>
+    decnum:rescale (decarg)
+    decNumber.rescale (decarg, decarg)</PRE>
+<P>Returns a decimal number that is numerically equal (except for 
+any rounding) to the left (1st) argument but modified so its exponent 
+has the value of the right (2nd) argument. See 
+<A HREF="#decnum:quantize"><CODE>decnum:quantize</CODE></A>. 
+The right (2nd) argument must be a whole number (before any rounding); 
+that is, any digits in the fractional part of the number must be zero.</P>
+<P>Uses the C library function <CODE>decNumberRescale()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:rotate"><CODE>decnum:rotate</CODE></A></H2>
+<PRE>
+    decnum:rotate (decarg)
+    decNumber.rotate (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the first argument with the digits 
+of its coefficient rotated to the left (if the second argument is 
+positive) or to the right (if the second argument is negative) 
+without adjusting the exponent or the sign.</P>
+<P>If the first argument has fewer digits than context <CODE>digits</CODE> the 
+coefficient is padded with zeros on the left before the
+rotate. Any leading zeros in the result are ignored, as usual.</P>
+<P>The second argument is the count of digits to rotate; it must be an 
+integer (that is, it must have an exponent of 0) and must be in the 
+range <CODE>-digits</CODE> through <CODE>+digits</CODE> in the current context.</P>
+<P>Uses the C library function <CODE>decNumberRotate()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:samequantum"><CODE>decnum:samequantum</CODE></A></H2>
+<PRE>
+    decnum:samequantum (decarg)
+    decNumber.samequantum (decarg, decarg)</PRE>
+<P>Returns the decimal number 1 when the exponents of the arguments are 
+equal, or if they are both Infinities or they are both NaNs; in all 
+other cases returns the decimal number 0. This function is used to 
+test whether the exponents of two numbers are equal. The coefficients 
+and signs of the arguments are ignored.</P>
+<P>Uses the C library function <CODE>decNumberSameQuantum()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:scaleb"><CODE>decnum:scaleb</CODE></A></H2>
+<PRE>
+    decnum:scaleb (decarg)
+    decNumber.scaleb (decarg, decarg)</PRE>
+<P>This function returns the result of multiplying the first argument by
+ten raised to the power of the second argument. It is used to adjust 
+(scale) the exponent of a number, using the rules of the <CODE>scaleB</CODE> 
+operation in the IEEE 754r proposal. The second argument must be an 
+integer (that is, it must have an exponent of 0) and it must also be 
+in the range <CODE>-n</CODE> through <CODE>+n</CODE>, where <CODE>n</CODE> is 
+<CODE>2 * (context.emax + context.digits)</CODE>.</P>
+<P>Uses the C library function <CODE>decNumberScaleB()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:shift"><CODE>decnum:shift</CODE></A></H2>
+<PRE>
+    decnum:shift (decarg)
+    decNumber.shift (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the first argument with the digits 
+of its coefficient shifted to the left (if the second argument is 
+positive) or to the right (if the second argument is negative) 
+without adjusting the exponent or the sign.</P>
+<P>The coefficient is padded with zeros on the left or right, as 
+necessary. Any leading zeros in the result are ignored, as usual.</P>
+<P>The second argument is the count of digits to shift; it must be an 
+integer (that is, it must have an exponent of 0) and must be in the 
+range <CODE>-digits</CODE> through <CODE>+digits</CODE> in the current context.</P>
+<P>Uses the C library function <CODE>decNumberShift()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:squareroot"><CODE>decnum:squareroot</CODE></A></H2>
+<PRE>
+    decnum:squareroot ()
+    decNumber.squareroot (decarg)</PRE>
+<P>Returns a decimal number that is the square root of its argument, 
+rounded if necessary using the digits setting in the decimal context 
+and using the round-half-even rounding algorithm.</P>
+<P>Uses the C library function <CODE>decNumberSquareRoot()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:subtract"><CODE>decnum:subtract</CODE></A></H2>
+<PRE>
+    decnum:subtract (decarg)
+    decnum:__sub (decarg)
+    decNumber.subtract (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the left (1st) argument minus the 
+right (2nd) argument.</P>
+<P>Note that by binding the method <CODE>__sub</CODE> to this function, the Lua 
+subtraction operator (<CODE>-</CODE>) may be used with a <CODE>decnum</CODE> on the left 
+and a <CODE>decarg</CODE> on the right.</P>
+<P>Uses the C library function <CODE>decNumberSubtract()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:tointegralexact"><CODE>decnum:tointegralexact</CODE></A></H2>
+<PRE>
+    decnum:tointegralexact ()
+    decNumber.tointegralexact (decarg)</PRE>
+<P>Returns a decimal number that is the argument with any fractional 
+part removed, if necessary, using the rounding mode in the decimal 
+context.</P>
+<P>The <CODE>Inexact</CODE> flag is set if the result is numerically different 
+from the argument. Other than that, no flags are set as long as the 
+argument is a <CODE>decnum</CODE> (unless the argument is a signaling NaN).
+The result may have a positive exponent.</P>
+<P>Uses the C library function <CODE>decNumberToIntegralExact()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:tointegralvalue"><CODE>decnum:tointegralvalue</CODE></A></H2>
+<PRE>
+    decnum:tointegralvalue ()
+    decNumber.tointegralvalue (decarg)</PRE>
+<P>Returns a decimal number that is the argument with any fractional 
+part removed, if necessary, using the rounding mode in the decimal 
+context.</P>
+<P>No flags, not even <CODE>Inexact</CODE>, are set as long as the 
+argument is a <CODE>decnum</CODE> (unless the argument is a signaling NaN).
+The result may have a positive exponent.</P>
+<P>Uses the C library function <CODE>decNumberToIntegralValue()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:trim"><CODE>decnum:trim</CODE></A></H2>
+<PRE>
+    decnum:trim ()
+    decNumber.trim (decarg)</PRE>
+<P>Returns a decimal number that is the argument with any insignificant 
+trailing zeros removed. That is, if the number has any fractional 
+trailing zeros they are removed by dividing the coefficient by the 
+appropriate power of ten and adjusting the exponent accordingly.</P>
+<P>Uses the C library function <CODE>decNumberTrim()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:xor"><CODE>decnum:xor</CODE></A></H2>
+<PRE>
+    decnum:xor (decarg)
+    decNumber.xor (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the digit-wise logical exclusive or 
+of the arguments. Note that all digits of the arguments must be 0 or 
+1 or else this operation returns NaN,</P>
+<P>Uses the C library function <CODE>decNumberXor()</CODE>.</P>
+<P><STRONG>Comparisons and Predicates</STRONG></P>
+<P>
+<H2><A NAME="decnum:class"><CODE>decnum:class</CODE></A></H2>
+<PRE>
+    decnum:class ()
+    decNumber.class (decarg)</PRE>
+<P>Returns the class of a decNumber. No error is possible. The class is
+one of the decNumber <A HREF="#classifications">Classifications</A>.</P>
+<P>Uses the C library function <CODE>decNumberClass()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:classasstring"><CODE>decnum:classasstring</CODE></A></H2>
+<PRE>
+    decnum:classasstring ()
+    decNumber.classasstring (decarg)</PRE>
+<P>Returns the class of a decNumber as a string. No error is 
+possible. The class is one of ``-Infinity'', ``-Normal'',  
+``-Subnormal'', ``-Zero'', ``+Zero'', ``+Subnormal'',
+``+Normal'', ``+Infinity'', ``NaN'', ``sNaN'', or ``Invalid''</P>
+<P>Uses the C library functions <CODE>decNumberClass()</CODE> and 
+<CODE>decNumberClassToString()</CODE>.</P>
+<P>
+<H2><A NAME="classtostring"><CODE>classtostring</CODE></A></H2>
+<PRE>
+    decNumber.classtostring (enum)</PRE>
+<P>Converts the <A HREF="#classifications">Classifications</A> of a decNumber to a string. 
+No error is possible. The class is one of ``-Infinity'', 
+``-Normal'', ``-Subnormal'', ``-Zero'', ``+Zero'', ``+Subnormal'',
+``+Normal'', ``+Infinity'', ``NaN'', ``sNaN'', or ``Invalid''.</P>
+<P>Uses the C library function <CODE>decNumberClassToString()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:compare"><CODE>decnum:compare</CODE></A></H2>
+<PRE>
+    decnum:compare (decarg)
+    decNumber.compare (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the comparison of its arguments 
+numerically. If the left (1st) argument is less than the right (2nd) 
+argument then the result is -1. If they are equal (that is, when 
+subtracted the result would be 0), then the result is 0. If the 
+left (1st) argument is greater than the right (2nd) argument then the 
+result is 1. If the operands are not comparable (that is, one or both 
+is a NaN) then the result is NaN.</P>
+<P>Uses the C library function <CODE>decNumberCompare()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:comparetotal"><CODE>decnum:comparetotal</CODE></A></H2>
+<PRE>
+    decnum:comparetotal (decarg)
+    decNumber.comparetotal (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the comparison of its arguments 
+numerically using the IEEE 754r proposed ordering. The result is the 
+similar to <A HREF="#decnum:compare"><CODE>decnum:compare</CODE></A> above, except that NaN 
+is never returned. The total order differs from the numerical 
+comparison in that:</P>
+<PRE>
+    -NaN &lt;  -sNaN &lt; -Infinity &lt; -finites &lt; -0 &lt; +0 &lt; +finites &lt; +Infinity &lt; +sNaN &lt; +NaN.</PRE>
+<P>Also, <CODE>1.000 &lt; 1.0</CODE> (etc.) and NaNs are ordered by payload.</P>
+<P>Uses the C library function <CODE>decNumberCompareTotal()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:comparetotalmag"><CODE>decnum:comparetotalmag</CODE></A></H2>
+<PRE>
+    decnum:comparetotalmag (decarg)
+    decNumber.comparetotalmag (decarg, decarg)</PRE>
+<P>Returns a decimal number that is the comparison of the magnitude of 
+its arguments using the IEEE 754r proposed ordering. It is identical 
+to <A HREF="#decnum:comparetotal"><CODE>decnum:comparetotal</CODE></A> above except that 
+the signs of the operands are ignored and taken to be 0 (non-negative).</P>
+<P>Uses the C library function <CODE>decNumberCompareTotalMag()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:eq"><CODE>decnum:eq</CODE></A></H2>
+<PRE>
+    decnum:eq (decarg)
+    decnum:__eq (decarg)
+    decNumber.eq (&lt;decarg&gt;, &lt;decarg&gt;)</PRE>
+<P>Returns a boolean that is true when the arguments are equal, false 
+otherwise.</P>
+<P>Note that by binding the method <CODE>__eq</CODE> to this function, the Lua 
+equality operators (<CODE>==</CODE> and <CODE>~=</CODE>) may be used with a <CODE>decnum</CODE> 
+on the left and a <CODE>decnum</CODE> on the right.</P>
+<P>Uses the C library functions <CODE>decNumberCompare()</CODE> and 
+<CODE>decNumberIsZero()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:iscanonical"><CODE>decnum:iscanonical</CODE></A></H2>
+<PRE>
+    decnum:iscanonical ()
+    decNumber.iscanonical (decarg)</PRE>
+<P>Returns true always, because decNumbers always have canonical 
+encodings (the function is provided for compatibility with the
+IEEE 754r operation <CODE>isCanonical</CODE>). No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsCanonical()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:isfinite"><CODE>decnum:isfinite</CODE></A></H2>
+<PRE>
+    decnum:isfinite ()
+    decNumber.isfinite (decarg)</PRE>
+<P>Returns a boolean that is true if the argument is finite, false 
+otherwise (that is, the argument is an infinity or a NaN).
+No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsFinite()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:isinfinite"><CODE>decnum:isinfinite</CODE></A></H2>
+<PRE>
+    decnum:isinfinite ()
+    decNumber.isinfinite (decarg)</PRE>
+<P>Returns a boolean that is true if the argument is infinite, 
+false otherwise. No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsInfinite()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:isnan"><CODE>decnum:isnan</CODE></A></H2>
+<PRE>
+    decnum:isnan ()
+    decNumber.isnan (decarg)</PRE>
+<P>Returns a boolean that is true if the argument is a NaN (quiet or 
+signaling), false otherwise. No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsNaN()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:isnegative"><CODE>decnum:isnegative</CODE></A></H2>
+<PRE>
+    decnum:isnegative ()
+    decNumber.isnegative (decarg)</PRE>
+<P>Returns a boolean that is true if the argument is is normal (that 
+is, finite, non-zero, and not subnormal), false otherwise.
+No error is possible.
+</P>
+<PRE>
+
+Uses the C library function C&lt;decNumberIsNegative()&gt;.</PRE>
+<P>
+<H2><A NAME="decnum:isnormal"><CODE>decnum:isnormal</CODE></A></H2>
+<PRE>
+    decnum:isnormal ()
+    decNumber.isnormal (decarg)</PRE>
+<P>Returns a boolean that is true if the argument is negative, false 
+otherwise.  No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsNormal()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:isqnan"><CODE>decnum:isqnan</CODE></A></H2>
+<PRE>
+    decnum:isqnan ()
+    decNumber.isqnan (decarg)</PRE>
+<P>Returns a boolean that is true if the argument is a quiet NaN, 
+false otherwise. No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsQNaN()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:issnan"><CODE>decnum:issnan</CODE></A></H2>
+<PRE>
+    decnum:issnan ()
+    decNumber.issnan (decarg)</PRE>
+<P>Returns a boolean that is true if the argument is a signaling NaN, 
+false otherwise. No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsSNaN()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:isspecial"><CODE>decnum:isspecial</CODE></A></H2>
+<PRE>
+    decnum:isspecial ()
+    decNumber.isspecial (decarg)</PRE>
+<P>Returns a boolean that is true if the argument has a special 
+value (Infinity or NaN), false otherwise; it is the inversion of 
+<A HREF="#decnum:isfinite"><CODE>decnum:isfinite</CODE></A>. No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsSpecial()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:issubnormal"><CODE>decnum:issubnormal</CODE></A></H2>
+<PRE>
+    decnum:issubnormal ()
+    decNumber.issubnormal (decarg)</PRE>
+<P>Returns a boolean that is true if the argument is subnormal (that 
+is, finite, non-zero, and not in the range of normal values), false 
+otherwise. No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsSubnormal()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:iszero"><CODE>decnum:iszero</CODE></A></H2>
+<PRE>
+    decnum:iszero
+    decNumber.iszero (decarg)</PRE>
+<P>Returns a boolean that is true if the argument is zero, false 
+otherwise. No error is possible.</P>
+<P>Uses the C library function <CODE>decNumberIsZero()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:le"><CODE>decnum:le</CODE></A></H2>
+<PRE>
+    decnum:le (decarg)
+    decnum:__le (decarg)
+    decNumber.le (&lt;decarg&gt;, &lt;decarg&gt;)</PRE>
+<P>Returns a boolean that is true when left (1st) argument is less than 
+or equal to the right (2nd) argument, false otherwise.</P>
+<P>Note that by binding the method <CODE>__le</CODE> to this function, the Lua 
+comparison operators (<CODE>&lt;=</CODE> and <CODE>&gt;=</CODE>) may be used with a 
+<CODE>decnum</CODE> on the left and a <CODE>decnum</CODE> on the right.</P>
+<P>Uses the C library functions <CODE>decNumberCompare()</CODE> 
+<CODE>decNumberIsNegative()</CODE> and <CODE>decNumberIsZero()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:lt"><CODE>decnum:lt</CODE></A></H2>
+<PRE>
+    decnum:lt (decarg)
+    decnum:__lt (decarg)
+    decNumber.lt (&lt;decarg&gt;, &lt;decarg&gt;)</PRE>
+<P>Returns a boolean that is true when left (1st) argument is less than 
+the right (2nd) argument, false otherwise.</P>
+<P>Note that by binding the method <CODE>__lt</CODE> to this function, the Lua 
+comparison operators (<CODE>&lt;</CODE> and <CODE>&gt;</CODE>) may be used with a 
+<CODE>decnum</CODE> on the left and a <CODE>decnum</CODE> on the right. Lua also assumes 
+that <CODE>a &lt;= b</CODE> is equivalent to <CODE>not (b &lt; a)</CODE> which in the 
+presence of NaNs may or may not be what you want - if not, use 
+<A HREF="#decnum:compare"><CODE>decnum:compare</CODE></A> directly.</P>
+<P>Uses the C library functions <CODE>decNumberCompare()</CODE> and 
+<CODE>decNumberIsNegative()</CODE>.</P>
+<P>
+<H2><A NAME="decnum:radix"><CODE>decnum:radix</CODE></A></H2>
+<PRE>
+    decnum:radix ()
+    decNumber.radix (decarg)</PRE>
+<P>Returns the radix (number base) used by the decNumber package. This
+always returns 10. No error is possible..</P>
+<P>Uses the C library function <CODE>decNumberRadix()</CODE>.</P>
+<P>
+<HR>
+<H1><A NAME="operations on random states">Operations on Random States</A></H1>
+<P>The following functions operate on random states.</P>
+<P>The random number generator in the <STRONG>ldecNumber</STRONG> package is based 
+on a lagged Fibonacci generator (``LFIB4''). George Marsaglia has this 
+to say about LFIB4:</P>
+<PRE>
+    LFIB4 is an extension of what I have previously defined as a 
+    lagged Fibonacci generator [...] I have developed the 4-lag 
+    generator LFIB4 using addition [...] Its period is 2^31*(2^256-1), 
+    about 2^287, and it seems to pass all tests --- in particular, 
+    those of the kind for which 2-lag generators using +,-, xor 
+    seem to fail.</PRE>
+<P>The <STRONG>ldecNumber</STRONG> package uses LFIB4 to produce a stream of bits in 
+10-bit chunks. This is convenient for making decimal numbers in 
+multiples of three decimal digits, and fits with the default setting 
+of the <STRONG>decNumber</STRONG> compile time parameter <CODE>DECDPUN</CODE>. If you change 
+<CODE>DECDPUN</CODE> then you may not be able to use the <STRONG>ldecNumber</STRONG> package's
+random states without modification to the C code. There is a compile
+time setting <CODE>LDN_ENABLE_RANDOM</CODE> that should be defined to 0 to 
+disable random state features.</P>
+<P>The <STRONG>ldecNumber</STRONG> package random state code has been tested with 
+L'Ecuyer and Simard's TestU01 Crush -- 
+see <A HREF="http://www.iro.umontreal.ca/~simardr/testu01/tu01.html">http://www.iro.umontreal.ca/~simardr/testu01/tu01.html</A></P>
+<PRE>
+    ========= Summary results of Crush =========
+    Version:          TestU01-1.1
+    Generator:        Generator dec12
+    Number of statistics:  144
+    Total CPU time:   02:55:11.06
+    All tests were passed</PRE>
+<P>While this confers a great deal of confidence in the quality of the 
+generator, two caveats are in order:</P>
+<OL>
+<LI>
+Crush uses IEEE doubles, and so the quality of the generator with more 
+than a dozen or so digits is untested, though believed to be good
+<P></P>
+<LI>
+This generator was not designed for cryptographic use, and so is 
+probably only useful for its intended applications: simulation 
+and testing
+<P></P></OL>
+<P>
+<H2><A NAME="decnumber.randomstate"><CODE>decNumber.randomstate</CODE></A></H2>
+<PRE>
+    decNumber.randomstate ([a [, b [, c [, d]]]])</PRE>
+<P>Creates and returns a new random state <CODE>decrst</CODE>. If any arguments 
+are not supplied, defaults are provided. The arguments <CODE>a</CODE>, <CODE>b</CODE>, 
+<CODE>c</CODE>, and <CODE>d</CODE> are used as inputs to the random number generator 
+KISS to initialize the random state.</P>
+<P>The random state userdata has one method: <CODE>__call</CODE>. This means that 
+the random state may be used as a function to return random values.</P>
+<P>
+<H2><A NAME="decrst:__call"><CODE>decrst:__call</CODE></A></H2>
+<PRE>
+    decrst([digits [, exponent]])</PRE>
+<P>Returns a new random decimal number. If supplied, <CODE>digits</CODE> is the 
+number of decimal digits in the new random decimal number; the default 
+is 12. If supplied, <CODE>exponent</CODE> is the exponent of the new random 
+decimal number; the default is <CODE>-digits</CODE> so the new random decimal 
+number is between zero (inclusive) and one (exclusive).</P>
+<P>
+<HR>
+<H1><A NAME="version">VERSION</A></H1>
+<P>This is <STRONG>ldecNumber</STRONG> version 21.</P>
+<P>
+<HR>
+<H1><A NAME="credits">CREDITS</A></H1>
+<P><STRONG>ldecNumber</STRONG> was developed by Doug Currie, Londonderry, NH, USA.</P>
+<P><STRONG>decNumber</STRONG> was developed by Mike Cowlishaw at IBM.</P>
+<P>
+<HR>
+<H1><A NAME="license">LICENSE</A></H1>
+<P>The <STRONG>ldecNumber</STRONG> distribution includes the C source code of the wrapper
+itself as a Lua module, a Makefile, examples, test code, and the 
+decNumber source code from IBM. The decNumber code is licensed as 
+follows (see <EM>ICU-license.html</EM> in the distribution):</P>
+<P>
+<H2><A NAME="icu license  icu 1.8.1 and later">ICU License - ICU 1.8.1 and later</A></H2>
+<P>COPYRIGHT AND PERMISSION NOTICE</P>
+<P>Copyright (c) 1995-2005 International Business Machines Corporation and others
+All rights reserved.</P>
+<P>Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+``Software''), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, provided that the above
+copyright <CODE>notice(s)</CODE> and this permission notice appear in all copies of
+the Software and that both the above copyright <CODE>notice(s)</CODE> and this
+permission notice appear in supporting documentation.</P>
+<P>THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.</P>
+<P>Except as contained in this notice, the name of a copyright holder
+shall not be used in advertising or otherwise to promote the sale, use
+or other dealings in this Software without prior written authorization
+of the copyright holder.</P>
+<P>--------------------------------------------------------------------------------</P>
+<P>All trademarks and registered trademarks mentioned herein are the property of 
+their respective owners.</P>
+<P>
+<H2><A NAME="ldecnumber license">ldecNumber License</A></H2>
+<P>The non-IBM Lua decNumber code and documentation are:</P>
+<P>* Copyright (c) 2006-7 Doug Currie, Londonderry, NH</P>
+<P>and licensed under the same terms as the ICU License, above.</P>
+
+</BODY>
+
+</HTML>

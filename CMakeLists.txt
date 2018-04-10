@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+
+project(ldecNumber C)
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE RelWithDebInfo)
+endif()
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+
+# Find Tarantool and Lua dependecies
+set(TARANTOOL_FIND_REQUIRED ON)
+find_package(Tarantool)
+include_directories(${TARANTOOL_INCLUDE_DIRS})
+
+# Find other dependecies
+
+# Set CFLAGS
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra")
+# Set CXXFLAGS
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra")
+
+# Build module
+
+if (APPLE)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined suppress -flat_namespace")
+endif(APPLE)
+
+# Add C library
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ldecNumber/decNumber)
+add_library(lib SHARED ldecNumber/ldecNumber.c
+  ldecNumber/decNumber/decContext.c
+  ldecNumber/decNumber/decNumber.c)
+
+target_link_libraries(lib)
+# ${MSGPUCK_LIBRARIES})
+set_target_properties(lib PROPERTIES PREFIX "" OUTPUT_NAME "ldecNumber")
+
+# Install module
+install(TARGETS lib LIBRARY DESTINATION ${TARANTOOL_INSTALL_LIBDIR})
+
+
+# Testing
+enable_testing()
+
+add_test(NAME ldecNumber COMMAND "${CMAKE_SOURCE_DIR}/test/ldecnumber.test.lua")
+
+# Add `make check`
+add_custom_target(check
+    WORKING_DIRECTORY ${PROJECT_BUILD_DIR}
+    COMMAND ctest -V)
