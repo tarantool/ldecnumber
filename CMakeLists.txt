@@ -28,10 +28,10 @@ if (APPLE)
 endif(APPLE)
 
 # Add C library
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ldecNumber/decNumber)
-add_library(lib SHARED ldecNumber/ldecNumber.c
-  ldecNumber/decNumber/decContext.c
-  ldecNumber/decNumber/decNumber.c)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/decNumber)
+add_library(lib SHARED ldecNumber.c
+  decNumber/decContext.c
+  decNumber/decNumber.c)
 
 target_link_libraries(lib)
 # ${MSGPUCK_LIBRARIES})
@@ -39,7 +39,6 @@ set_target_properties(lib PROPERTIES PREFIX "" OUTPUT_NAME "ldecNumber")
 
 # Install module
 install(TARGETS lib LIBRARY DESTINATION ${TARANTOOL_INSTALL_LIBDIR})
-
 
 # Testing
 enable_testing()
