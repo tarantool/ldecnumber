@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/tarantool/ldecnumber.svg?branch=master)](https://travis-ci.org/tarantool/ldecnumber)
+
 # Intro
 
 ldecNumber -- a tarantool (luajit, Lua 5.1) wrapper for the `decNumber` Decimal Arithmetic package.
