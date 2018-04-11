@@ -1,4 +1,5 @@
 #!/usr/bin/env tarantool
+require('strict').on()
 
 local decNumber = require('ldecNumber')
 local tap = require('tap')
@@ -57,7 +58,7 @@ end
 test:test('Fib Functions', function(test)
 	     test:plan(5)
 	     local one = decNumber.tonumber "1"
-	     ctx = decNumber.getcontext()
+	     local ctx = decNumber.getcontext()
 	     ctx:setdefault (decNumber.INIT_BASE)
 	     ctx:setdigits (69)
 	     local Fib
@@ -91,7 +92,7 @@ test:test('Floor/Mod Functions', function(test)
 	     local one = decNumber.tonumber "1"
 	     local zero = decNumber.tonumber "0"
 	     local a,b,x,y
-	     ctx = decNumber.getcontext()
+	     local ctx = decNumber.getcontext()
 	     ctx:setdefault (decNumber.INIT_BASE)
 	     ctx:setdigits (69)
 	     ctx:setround (decNumber.ROUND_FLOOR)
@@ -194,7 +195,7 @@ test:test('Floor/Mod Functions Infinite', function(test)
 	     local one = decNumber.tonumber "1"
 	     local zero = decNumber.tonumber "0"
 	     local a,b,x,y
-	     ctx = decNumber.getcontext()
+	     local ctx = decNumber.getcontext()
 	     ctx:setdefault (decNumber.INIT_BASE)
 	     ctx:setdigits (69)
 	     ctx:setround (decNumber.ROUND_FLOOR)
@@ -338,46 +339,46 @@ test:test("Test floor", function (test)
 	     test:is (n:floor("10"), decNumber.tonumber "-175")
 	     -- identity tests
 	     for i = 1,100 do
-		x = math.random(999999999)
-		y = math.random(999999999)
-		a = decNumber.tonumber(x)
-		b = decNumber.tonumber(y)
+		local x = math.random(999999999)
+		local y = math.random(999999999)
+		local a = decNumber.tonumber(x)
+		local b = decNumber.tonumber(y)
 		test:is (a%b, a - b * a:floor(b))
 		test:is ((-a)%(b), (-a) - b * (-a):floor(b))
 		test:is (a%(-b), a + b * a:floor(-b))
 		test:is ((-a)%(-b), (-a) + b * (-a):floor(-b))
 	     end
 	     for i = 1,100 do
-		x = (-1^math.random(2)) * math.random(999999999)
-		y = (-1^math.random(2)) * math.random(999999999)
-		a = decNumber.tonumber(x)
-		b = decNumber.tonumber(y)
+		local x = (-1^math.random(2)) * math.random(999999999)
+		local y = (-1^math.random(2)) * math.random(999999999)
+		local a = decNumber.tonumber(x)
+		local b = decNumber.tonumber(y)
 		test:is (a%b, a - b * a:floor(b))
 		test:is ((-a)%(b), (-a) - b * (-a):floor(b))
 		test:is (a%(-b), a + b * a:floor(-b))
 		test:is ((-a)%(-b), (-a) + b * (-a):floor(-b))
 	     end
 	     for i = 1,200 do
-		x = (-1^math.random(2)) * math.random(999999999)/2^math.random(29)
-		y = (-1^math.random(2)) * math.random(999999999)/2^math.random(29)
-		a = decNumber.tonumber(x)
-		b = decNumber.tonumber(y)
+		local x = (-1^math.random(2)) * math.random(999999999)/2^math.random(29)
+		local y = (-1^math.random(2)) * math.random(999999999)/2^math.random(29)
+		local a = decNumber.tonumber(x)
+		local b = decNumber.tonumber(y)
 		test:is (a%b, a - b * a:floor(b))
 		test:is ((-a)%(b), (-a) - b * (-a):floor(b))
 		test:is (a%(-b), a + b * a:floor(-b))
 		test:is ((-a)%(-b), (-a) + b * (-a):floor(-b))
 	     end
 	     for x,y in pairs {[0]=1, [1]=0} do
-		a = decNumber.tonumber(x)
-		b = decNumber.tonumber(y)
+		local a = decNumber.tonumber(x)
+		local b = decNumber.tonumber(y)
 		assert_nequal (test, a%b, a - b * a:floor(b))
 		assert_nequal (test, (-a)%(b), (-a) - b * (-a):floor(b))
 		assert_nequal (test, a%(-b), a + b * a:floor(-b))
 		assert_nequal (test, (-a)%(-b), (-a) + b * (-a):floor(-b))
 	     end
 	     for x,y in pairs {[0]=0, [1]=1} do
-		a = decNumber.tonumber(x)
-		b = decNumber.tonumber(y)
+		local a = decNumber.tonumber(x)
+		local b = decNumber.tonumber(y)
 		assert_nequal (test, a%b, a - b * a:floor(b))
 		assert_nequal (test, (-a)%(b), (-a) - b * (-a):floor(b))
 		assert_nequal (test, a%(-b), a + b * a:floor(-b))
@@ -394,7 +395,7 @@ test:test("Rounding", function (test)
 	     -- decNumber.ROUND_HALF_DOWN   0.5 rounds down
 	     -- decNumber.ROUND_DOWN        round towards 0 (truncate)
 	     -- decNumber.ROUND_FLOOR       round towards -infinity    local n = decNumber.tonumber "12.345"
-	     ctx = decNumber.getcontext()
+	     local ctx = decNumber.getcontext()
 	     ctx:setdefault (decNumber.INIT_BASE)
 	     ctx:setdigits (5)
 	     local m = decNumber.tonumber "12.343"
@@ -455,12 +456,12 @@ end)
 
 test:test("Quanitize", function(test)
 	     test:plan(12)
-	     ctx = decNumber.getcontext()
-	     dupc = ctx:duplicate()
+	     local ctx = decNumber.getcontext()
+	     local dupc = ctx:duplicate()
 	     dupc:setdefault (decNumber.INIT_BASE)
 	     dupc:setdigits (5)
 	     dupc:setround(decNumber.ROUND_CEILING)
-	     dupe = dupc:duplicate()
+	     local dupe = dupc:duplicate()
 	     dupe:setround(decNumber.ROUND_HALF_UP)
 	     local m = decNumber.tonumber "12.343"
 	     local n = decNumber.tonumber "12.345"
