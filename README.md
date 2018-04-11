@@ -12,7 +12,7 @@ tarantoolctl rocks install https://raw.githubusercontent.com/tarantool/ldecnumbe
 ```
 
 
-# Simple example
+# Example
 
 Single user billing system
 
@@ -29,18 +29,15 @@ balance = balance + "1.25"
 
 
 -- take some money
-
 balance = balance - "1.12"
 
 -- check balance value is valid
-
 balance:isfinite() --> true
 balance:isinfinite() --> false
 balance:isnan() --> false
 
--- send to other system
+-- send balance to report system
 balance:tostring() --> '0.14'
-
 ```
 
 # Documentation
@@ -64,8 +61,6 @@ The decNumber C library is
 Copyright (c) 1995-2005 International Business Machines Corporation and others
 All rights reserved.
 
-The software and documentation is made available under the terms of the 
-ICU License (ICU 1.8.1 and later) included in the package as 
+The software and documentation is made available under the terms of the
+ICU License (ICU 1.8.1 and later) included in the package as
 decNumber/ICU-license.html.
-
-
