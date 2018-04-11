@@ -10,14 +10,20 @@ source  = {
 description = {
     summary  = "Decimal Arithmetic package for Tarantool";
     detailed = [[
-    The ldecNumber package implements the General Decimal Arithmetic Specification. This specification defines a decimal arithmetic which meets the requirements of commercial, financial, and human-oriented applications. It also matches the decimal arithmetic in the IEEE 754 Standard for Floating Point Arithmetic.
+    The ldecNumber package implements the General Decimal
+    Arithmetic Specification. This specification defines
+    a decimal arithmetic which meets the requirements of
+    commercial, financial, and human-oriented applications.
+    It also matches the decimal arithmetic in the IEEE 754
+    Standard for Floating Point Arithmetic.
     ]];
-    homepage = 'https://github.com/tarantool/ldecnumber.git';
+    homepage = 'https://github.com/tarantool/ldecnumber';
     maintainer = "Michael Filonenko <filonenko.mikhail@gmail.com>";
     license  = 'ICU1.8.1';
 }
 
 dependencies = {
+    'tarantool';
     'lua == 5.1';
 }
 
