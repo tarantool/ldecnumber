@@ -18,6 +18,7 @@ install_manifest.txt
 *.xlog*
 *~
 .gdb_history
+.rocks/
 ./build
 /build
 VERSION

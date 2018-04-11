@@ -7,6 +7,6 @@ all:
 	/bin/sh -c '\
 		apk add --no-cache --virtual .build-deps gcc make cmake musl-dev; \
 		cd /tmp/ldecnumber; \
-		tarantoolctl rocks make ./rockspecs/ldecnumber-scm-1.rockspec; \
+		tarantoolctl rocks make; \
 		make -C build.luarocks ARGS=-V test; \
 	'
