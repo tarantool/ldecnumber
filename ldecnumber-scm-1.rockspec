@@ -14,7 +14,7 @@ description = {
     ]];
     homepage = 'https://github.com/tarantool/ldecnumber.git';
     maintainer = "Michael Filonenko <filonenko.mikhail@gmail.com>";
-    license  = 'BSD2';
+    license  = 'ICU1.8.1';
 }
 
 dependencies = {
