@@ -43,15 +43,16 @@ balance:tostring() --> '0.14'
 
 ```
 
-# HTML documentation
+# Documentation
 
-https://htmlpreview.github.io/?https://github.com/tarantool/ldecnumber/blob/master/doc/ldecNumber.html
+* [doc/decNumber.pdf](doc/decNumber.pdf) -- The decNumber C library (pdf version)
+* [doc/ldecNumber.pdf](doc/ldecNumber.pdf) -- A Lua 5.1 wrapper for the decNumber library (pdf version)
+* [doc/ldecNumber.html](https://htmlpreview.github.io/?https://github.com/tarantool/ldecnumber/blob/master/doc/ldecNumber.html)
+-- A Lua 5.1 wrapper for the decNumber library (html version)
 
 # Links
 
-The decNumber C Library
-http://speleotrove.com/decimal/decnumber.html
-
+* http://speleotrove.com/decimal/decnumber.html -- The decNumber C Library
 
 # Copyrights
 
