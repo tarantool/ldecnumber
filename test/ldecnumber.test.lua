@@ -1,7 +1,7 @@
 #!/usr/bin/env tarantool
 require('strict').on()
 
-local decNumber = require('ldecNumber')
+local decNumber = require('ldecnumber')
 local tap = require('tap')
 
 local test = tap.test('ldecNumber tests')
