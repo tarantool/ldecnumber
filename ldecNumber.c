@@ -35,8 +35,6 @@ WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "decimal128.h"
 
-#include "version.h"
-
 // #define LDN_SEAL_TABLES // to make tables and metatables read only
 
 // testing
