@@ -34,8 +34,7 @@ add_library(lib SHARED ldecNumber.c
   decNumber/decNumber.c)
 
 target_link_libraries(lib)
-# ${MSGPUCK_LIBRARIES})
-set_target_properties(lib PROPERTIES PREFIX "" OUTPUT_NAME "ldecNumber")
+set_target_properties(lib PROPERTIES PREFIX "" OUTPUT_NAME "ldecnumber")
 
 # Install module
 install(TARGETS lib LIBRARY DESTINATION ${TARANTOOL_INSTALL_LIBDIR})

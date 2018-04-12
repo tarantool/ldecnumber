@@ -4,7 +4,7 @@
 *
 * Copyright (c) 2006-7 Doug Currie, Londonderry, NH
 * All rights reserved.
-* 
+*
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -78,15 +78,15 @@ static void dn_dnc_init (void)
 /* ***************** context support functions ***************** */
 
 /*
-There is one decNumber decContext per Lua thread. This library stores 
-these decContexts as full userdata instances in the LUA_ENVIRONINDEX; 
+There is one decNumber decContext per Lua thread. This library stores
+these decContexts as full userdata instances in the LUA_ENVIRONINDEX;
 the keys of this table are the thread addresses of the thread owning the
 decContext.
 
 Because there is the overhead of a table lookup to get this decContext
 for every decNumber operation, this library caches the most recently used
-decContext. It is expected that the cache hit ratio will be large; it will 
-be 100% for a single threaded application, and should help multi-threaded 
+decContext. It is expected that the cache hit ratio will be large; it will
+be 100% for a single threaded application, and should help multi-threaded
 applications considerably.
 
 The cache depends on userdata not being moved by the garbage collector...
@@ -110,7 +110,7 @@ are an internal data in Lua, the only purpose of userdata is to be used
 by C code, which prefer that things stay where they are :)
 
 
-> If that is the case, I'm confused about how the gc can shrink the pool 
+> If that is the case, I'm confused about how the gc can shrink the pool
 > without invalidating userdata. Using sockets for userdata :
 
 The gc can shrink the pool as much as malloc/free can. In fact, Lua
@@ -177,7 +177,7 @@ static decContext *ldn_push_context (lua_State *L)
     decContext *dc;
     lua_pushthread (L);        /* key */
     lua_rawget (L, LUA_ENVIRONINDEX);
-    
+
     if (lua_isnil (L, -1) )
     {
         /* nothing in the thread local state, so make a new context */
@@ -913,7 +913,7 @@ static const luaL_Reg dn_dnumber_meta_lib[] =
     {"eq",              dn_eq     },
     {"lt",              dn_lt     },
     {"le",              dn_le     },
-    
+
     {"exp",             dn_exp    },
     {"ln",              dn_ln     },
     {"log10",           dn_log10  },
@@ -961,7 +961,7 @@ static const luaL_Reg dn_dnumber_meta_lib[] =
     {"scaleb",          dn_scaleb        },
     {"shift",           dn_shift         },
     {"xor",             dn_xor           },
-    
+
     {"fma",             dn_fma           },
 
     {"mod",             dn_mod           },
@@ -1001,7 +1001,7 @@ static const luaL_Reg dn_dnumber_meta_lib[] =
     { "__le",       dn_le     },
     { "__tostring", dn_string },
     { "__concat",   dn_concat },
-    
+
     { NULL,         NULL      }
 };
 
@@ -1031,7 +1031,7 @@ static const luaL_Reg dn_context_meta_lib[] =
     {"duplicate",        dn_ctx_dup           },
     {"setcontext",       dn_set_context       },
     {"__tostring",       dn_ctx_tostring      },
-    
+
     {NULL, NULL}
 };
 
@@ -1040,7 +1040,7 @@ static const luaL_Reg dn_lib[] =
     {"eq",              dn_eq     },
     {"lt",              dn_lt     },
     {"le",              dn_le     },
-    
+
     {"exp",             dn_exp    },
     {"ln",              dn_ln     },
     {"log10",           dn_log10  },
@@ -1110,7 +1110,7 @@ static const luaL_Reg dn_lib[] =
     {"class",           dn_class         },
     {"classtostring",   dn_classtostring },
     {"classasstring",   dn_classasstring },
-    
+
     {"trim",            dn_trim          },
 
     {"getcontext",      dn_get_context   },
@@ -1118,9 +1118,9 @@ static const luaL_Reg dn_lib[] =
     {"tonumber",        dn_todecnumber   },
     {"tostring",        dn_string        },
     {"toengstring",     dn_engstring     },
-    
+
     {"randomstate",     dn_randomstate   },
-    
+
 #if LDN_CACHE_TEST
     {"cachestats",      dn_cache_stats   },
 #endif
@@ -1138,7 +1138,7 @@ static void mkmeta (lua_State *L, const char *uname, const char *tname, const lu
     lua_settable (L,-3);
 }
 
-LUALIB_API int luaopen_ldecNumber(lua_State *L)
+LUALIB_API int luaopen_ldecnumber(lua_State *L)
 {
     /* initialize constants */
     dn_dnc_init ();
