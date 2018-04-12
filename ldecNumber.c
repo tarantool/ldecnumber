@@ -57,7 +57,7 @@ WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define DN_DNUMBER_META " decNumber_NuMBeR_MeTA"
 #define DN_DRANDOM_META " decNumber_RaNDoM_MeTA"
 
-#define DN_VERSION      "1.1.1"
+#define DN_VERSION      "1.1.2"
 
 const char *dn_context_meta = DN_CONTEXT_META;
 const char *dn_dnumber_meta = DN_DNUMBER_META;
