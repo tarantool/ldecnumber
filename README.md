@@ -2,7 +2,7 @@
 
 # Intro
 
-ldecNumber -- a tarantool (luajit, Lua 5.1) wrapper for the `decNumber` Decimal Arithmetic package.
+ldecnumber -- a tarantool (luajit, Lua 5.1) wrapper for the `decNumber` Decimal Arithmetic package.
 
 The wrapper and `decNumber` library are built as a monolithic Lua module.
 
@@ -19,7 +19,7 @@ tarantoolctl rocks install https://raw.githubusercontent.com/tarantool/ldecnumbe
 Single user billing system
 
 ```
-decnumber = require('ldecNumber')
+decnumber = require('ldecnumber')
 
 local balance = decnumber.tonumber("0.00")
 
