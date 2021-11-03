@@ -3,7 +3,7 @@ package = 'ldecnumber'
 version = 'scm-1'
 
 source  = {
-    url    = 'git://github.com/tarantool/ldecnumber.git';
+    url    = 'git+https://github.com/tarantool/ldecnumber.git';
     branch = 'master';
 }
 
